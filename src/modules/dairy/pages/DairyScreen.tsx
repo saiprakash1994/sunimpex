@@ -151,10 +151,11 @@ const DairyPage = () => {
 
                 {/* Search */}
                 <View style={styles.searchContainer}>
-                    <Icon name="search" size={16} color="#999" />
+                    <Icon name="search" size={16} color={TEXT_COLORS.secondary} />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search dairies..."
+                        placeholderTextColor={TEXT_COLORS.primary}
                         value={searchTerm}
                         onChangeText={setSearchTerm}
                     />
@@ -268,6 +269,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         fontSize: 14,
         marginLeft: 8,
+        color: TEXT_COLORS.primary
     },
 
     /** Dairy Row */

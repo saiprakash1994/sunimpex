@@ -210,10 +210,15 @@ const MemberList = () => {
                         </View>
                     </View>
                     {!isDevice && (
-                        <View style={styles.pickerContainer}>
+                        <View style={styles.card}>
+                            <Text style={styles.cardTitle}>
+                                <Icon name="desktop" size={18} color={THEME_COLORS.secondary} /> Select Device</Text>
+
                             <Picker
                                 selectedValue={deviceCode}
                                 onValueChange={(value) => setDeviceCode(value)}
+                                style={styles.pickerModern}
+
                             >
                                 <Picker.Item label="Select Device" value="" />
                                 {deviceList.map((dev: any) => (
@@ -221,6 +226,8 @@ const MemberList = () => {
                                 ))}
                             </Picker>
                         </View>
+
+
                     )}
 
                     {(isDairyLoading || isDeviceLoading) ? (
@@ -410,6 +417,16 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         color: "#333",
     },
+    pickerModern: { color: TEXT_COLORS.primary },
+    card: { backgroundColor: '#fff', borderRadius: 8, padding: 16, marginBottom: 16, elevation: 2 },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 8,
+    },
+
     addButton: {
         flexDirection: "row",
         backgroundColor: THEME_COLORS.secondary,

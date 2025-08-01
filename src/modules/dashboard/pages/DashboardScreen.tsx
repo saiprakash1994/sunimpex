@@ -128,8 +128,8 @@ const DashboardScreen = () => {
 
     // Updated Pie Chart data with a modern color scheme
     const pieData = [
-        { name: "Cow Milk 🐄", quantity: cowQuantity, color: "#4f46e5", legendFontColor: "#1f2937", legendFontSize: 15 },
-        { name: "Buffalo Milk 🐃", quantity: buffaloQuantity, color: "#3b82f6", legendFontColor: "#1f2937", legendFontSize: 15 },
+        { name: "Cow Milk 🐄", quantity: cowQuantity, color: THEME_COLORS.primary, legendFontColor: "#1f2937", legendFontSize: 15 },
+        { name: "Buffalo Milk 🐃", quantity: buffaloQuantity, color: THEME_COLORS.secondary, legendFontColor: "#1f2937", legendFontSize: 15 },
     ];
 
 
@@ -251,7 +251,7 @@ const DashboardScreen = () => {
                 </View>
             ) : isError ? (
                 <View style={styles.errorCard}>
-                    <Icon name="alert-circle-outline" size={22} color="#ef4444" />
+                    <Icon name="alert-circle-outline" size={22} color={TEXT_COLORS.error} />
                     <Text style={styles.errorText}>
                         Error: {
                             (error && 'data' in error && (error as any).data?.message)
@@ -338,8 +338,8 @@ const DashboardScreen = () => {
                                 backgroundGradientFrom: "#fff",
                                 backgroundGradientTo: "#fff",
                                 decimalPlaces: 2,
-                                color: (opacity = 1) => `rgba(99, 102, 241, ${opacity})`,
-                                labelColor: () => "#000",
+                                color: (opacity) => `rgba(43, 80, 161, ${opacity})`,
+                                labelColor: () => TEXT_COLORS.primary,
                             }}
                             style={styles.chart}
                         />
@@ -416,8 +416,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: 8,
     },
-    datePickerText: { fontSize: 15 },
-    pickerModern: { backgroundColor: "#f1f1f1", borderRadius: 8, marginBottom: 8 },
+    datePickerText: { fontSize: 15, color: TEXT_COLORS.primary },
+    pickerModern: { backgroundColor: "#f1f1f1", borderRadius: 8, marginBottom: 8, color: TEXT_COLORS.primary },
     resetButtonModern: {
         marginTop: 10,
         backgroundColor: THEME_COLORS.secondary,
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 8,
     },
-    errorText: { color: "#ef4444", fontWeight: "bold", marginLeft: 8 },
+    errorText: { color: TEXT_COLORS.error, fontWeight: "bold", marginLeft: 8 },
     emptyStateCard: {
         backgroundColor: "#fff",
         borderRadius: 16,

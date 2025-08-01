@@ -158,6 +158,7 @@ const LoginScreen: React.FC = () => {
                             <FontAwesomeIcon icon={faEnvelope} size={18} color={THEME_COLORS.secondary} style={styles.inputIcon} />
                             <TextInput
                                 placeholder="Email Address"
+                                placeholderTextColor={TEXT_COLORS.primary}
                                 value={loginInfo.email}
                                 onChangeText={(text) => handleChange("email", text)}
                                 autoCapitalize="none"
@@ -173,6 +174,7 @@ const LoginScreen: React.FC = () => {
                             <FontAwesomeIcon icon={faLock} size={18} color={THEME_COLORS.secondary} style={styles.inputIcon} />
                             <TextInput
                                 placeholder="Password"
+                                placeholderTextColor={TEXT_COLORS.primary}
                                 value={loginInfo.password}
                                 onChangeText={(text) => handleChange("password", text)}
                                 secureTextEntry={!showPassword}
@@ -297,6 +299,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 8,
         fontSize: 16,
+        color: TEXT_COLORS.primary
     },
     inputError: {
         borderColor: "red",

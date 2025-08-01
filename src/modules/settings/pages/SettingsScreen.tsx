@@ -215,12 +215,14 @@ const SettingsScreen: React.FC = () => {
     const renderDeviceSelection = () => (
         <View style={styles.card}>
             <Text style={styles.cardTitle}>
-                <Icon name="desktop" size={18} /> Select Device
+                <Icon name="desktop" size={18} color={THEME_COLORS.secondary} /> Select Device
             </Text>
             <View style={{ marginVertical: 8 }}>
                 <Picker
                     selectedValue={selectedDeviceId}
                     onValueChange={(value) => setSelectedDeviceId(value)}
+                    style={styles.pickerModern}
+
                 >
                     <Picker.Item label="-- Select Device --" value="" />
                     {deviceList?.map((dev: any) => (
@@ -585,6 +587,8 @@ const styles = StyleSheet.create({
         padding: 6,
         marginLeft: 8,
     },
+    pickerModern: { color: TEXT_COLORS.primary },
+
     tabBarScroll: { marginVertical: 8 },
     tabBar: { flexDirection: 'row' },
     tabButton: { minWidth: 90, alignItems: 'center', padding: 10, flexDirection: 'row', justifyContent: 'center', borderRadius: 8, marginRight: 8 },

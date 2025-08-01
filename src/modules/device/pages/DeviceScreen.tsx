@@ -18,7 +18,7 @@ import { useDeleteDeviceMutation, useGetAllDevicesQuery, useGetDeviceByCodeQuery
 import { roles } from "../../../shared/utils/appRoles";
 import { useGetAllDairysQuery } from "../../dairy/store/dairyEndPoint";
 import { deleteDevice, setDevices } from "../store/deviceSlice";
-import { THEME_COLORS } from "../../../globalStyle/GlobalStyles";
+import { TEXT_COLORS, THEME_COLORS } from "../../../globalStyle/GlobalStyles";
 
 const { width } = Dimensions.get("window");
 type RootStackParamList = {
@@ -242,9 +242,11 @@ const DeviceScreen: React.FC = () => {
 
 
             <View style={styles.searchBar}>
-                <Icon name="search" size={16} color="#999" />
+                <Icon name="search" size={16} color={TEXT_COLORS.secondary} />
                 <TextInput
                     style={styles.searchInput}
+                    placeholderTextColor={TEXT_COLORS.primary}
+
                     placeholder="Search by device ID or email..."
                     value={search}
                     onChangeText={setSearch}
@@ -352,7 +354,7 @@ const styles = StyleSheet.create({
         flex: 1,
         marginLeft: 8,
         fontSize: 14,
-        color: "#333",
+        color: TEXT_COLORS.primary
     },
     card: {
         backgroundColor: "#fff",
