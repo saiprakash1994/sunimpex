@@ -44,7 +44,7 @@ function CustomTabBarLabel({ label, color }: any) {
             {label === "Upload" && <UploadIcon color={color} height={25} width={25} fill={color} />}
             {label === "Logout" && <LogoutIcon color={color} height={25} width={25} fill={color} />}
             {label === "Dairy" && <DairyIcon color={color} height={25} width={25} fill={color} />}
-            {label === "Rate Table" && <RateChart color={color} height={25} width={25} fill={color} />}
+            {/* {label === "Rate Table" && <RateChart color={color} height={25} width={25} fill={color} />} */}
             {label === "Member List" && <GroupPeople color={color} height={25} width={25} fill={color} />}
 
         </View>
@@ -218,7 +218,7 @@ export const DrawerNav = () => {
                     },
                 }}
             />
-            <Drawer.Screen
+            {/* <Drawer.Screen
                 name="rateTable"
                 component={RateTable}
                 options={{
@@ -233,7 +233,7 @@ export const DrawerNav = () => {
                     },
                     drawerIcon: ({ color }) => <CustomTabBarLabel label={"Rate Table"} color={color} />,
                 }}
-            />
+            /> */}
             <Drawer.Screen
                 name="members"
                 component={MembersList}

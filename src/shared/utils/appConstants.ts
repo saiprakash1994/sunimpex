@@ -18,7 +18,7 @@ export const DairyOptions = [
   { title: 'settings', label: 'Settings', icon: SettingsIcon },
   { title: 'reports', label: 'Reports', icon: ReportsIcon },
   { title: 'upload', label: 'Upload Files', icon: UploadIcon },
-  { title: 'rateTable', label: 'Rate Table Generator', icon: RateChart },
+  // { title: 'rateTable', label: 'Rate Table Generator', icon: RateChart },
 
   { title: 'profile', label: 'Profile', icon: AccountIcon },
 ];
@@ -30,5 +30,5 @@ export const DeviceOptions = [
   { title: 'reports', label: 'View Reports', icon: ReportsIcon },
   { title: 'upload', label: 'Upload Files', icon: UploadIcon },
   { title: 'profile', label: 'Profile', icon: AccountIcon },
-  { title: 'rateTable', label: 'Rate Table Generator', icon: RateChart },
+  // { title: 'rateTable', label: 'Rate Table Generator', icon: RateChart },
 ];
