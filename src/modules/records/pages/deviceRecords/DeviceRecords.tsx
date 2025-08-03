@@ -70,6 +70,8 @@ const DeviceRecords: React.FC = () => {
     const [date, setDate] = useState(getToday());
     const [shift, setShift] = useState("");
     const [milkTypeFilter, setMilkTypeFilter] = useState("ALL");
+    const [result, setResult] = useState<any>();
+
     const [allRecords, setAllRecords] = useState<RecordItem[]>([]);
     const [totals, setTotals] = useState<any[]>([]);
     const [hasSearched, setHasSearched] = useState(false);
@@ -111,6 +113,7 @@ const DeviceRecords: React.FC = () => {
                     limit: 10000,
                 },
             }).unwrap();
+            setResult(result)
             setAllRecords(result?.records || []);
             setTotals(result?.totals || []);
             setTotalCount(result?.records?.length || 0);
@@ -132,8 +135,8 @@ const DeviceRecords: React.FC = () => {
         date,
         shift,
         milkTypeFilter,
-        triggerGetRecords,
         totalCount,
+        result
     });
 
     const filteredRecords =

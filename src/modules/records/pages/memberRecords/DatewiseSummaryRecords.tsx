@@ -7,11 +7,11 @@ import {
     FlatList,
     ScrollView,
     Image,
+    Platform,
 } from "react-native";
 import { useSelector } from "react-redux";
 import debounce from "lodash.debounce";
 import { useToast } from "react-native-toast-notifications";
-import { useMemberExportHandlers } from "../utils/useMemberExportHandlers";
 import ExportButtonsSection from "../utils/ExportButtonsSection";
 import MemberRecordsFilterSection from "../utils/MemberRecordsFilterSection";
 import { UserTypeHook } from "../../../../shared/hooks/userTypeHook";
@@ -20,7 +20,13 @@ import { useGetAllDevicesQuery, useGetDeviceByCodeQuery, useGetDeviceByIdQuery }
 import { useLazyGetDatewiseSummaryReportQuery } from "../../store/recordEndPoint";
 import { ShowToster } from "../../../../shared/components/ShowToster";
 import { TEXT_COLORS, THEME_COLORS } from "../../../../globalStyle/GlobalStyles";
-
+import RNFS from "react-native-fs";
+import Share from "react-native-share";
+import Papa from "papaparse";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import RNFetchBlob from "react-native-blob-util";
+import { Path } from "react-native-svg";
 const getToday = () => new Date().toISOString().split("T")[0];
 
 const DatewiseSummaryRecords: React.FC = () => {
@@ -139,17 +145,7 @@ const DatewiseSummaryRecords: React.FC = () => {
             setFilterEndMember("");
         }
     }, [deviceCode, memberCodes]);
-    const { handleExportCSV, handleExportPDF } = useMemberExportHandlers({
-        deviceCode,
-        fromDate,
-        toDate,
-        milkTypeFilter,
-        triggerGetRecords,
-        totalCount,
-        shift,
 
-        reportType: 'summary',
-    });
 
     const filteredRecords =
         milkTypeFilter === "ALL"
@@ -183,9 +179,144 @@ const DatewiseSummaryRecords: React.FC = () => {
             </Text>
         </View>
     );
+    const saveAndShareFile = async (filePath: string, mime: string) => {
+        try {
+            const exists = await RNFS.exists(filePath);
+            if (!exists) {
+                ShowToster(toast, `File not found: ${filePath}`, '', 'error');
+                return;
+            }
+
+            const finalPath = `file://${filePath}`;
+            console.log("Sharing file at:", finalPath);
+
+            await Share.open({
+                url: finalPath,
+                type: mime,
+                failOnCancel: false,
+            });
+        } catch (err: any) {
+            console.log("Share error", err);
+            ShowToster(toast, "Unable to share file.", '', 'error');
+        }
+    };
+
+    const handleExportCSV = async () => {
+        if (!allRecords?.length) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
+
+        let csvData: any = [];
+
+        allRecords?.forEach((record) => {
+            record?.milktypeStats.forEach((stat: any) => {
+                csvData.push({
+                    Date: record?.date,
+                    Shift: record?.shift,
+                    "Milk Type": stat?.milktype,
+                    "Samples": stat?.totalSamples,
+                    "Avg FAT": stat?.avgFat?.toFixed(2),
+                    "Avg SNF": stat?.avgSnf?.toFixed(2),
+                    "Avg CLR": stat?.avgClr?.toFixed(2),
+
+                    "Avg Rate": stat?.avgRate?.toFixed(2),
+                    "Total Qty": stat?.totalQty?.toFixed(2),
+                    "Total Amount": stat?.totalAmount?.toFixed(2),
+                    "Incentive": stat?.totalIncentive?.toFixed(2),
+                    "Grand Total": stat?.grandTotal?.toFixed(2),
+                });
+            });
+        });
+
+        const csvContent = Papa.unparse(csvData);
+
+        // File Path
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${getToday()}_${deviceCode}_milktype_summary.csv`;
+
+        await RNFS.writeFile(path, csvContent, "utf8");
+        ShowToster(toast, `File saved to:\n${path}`, '', 'success');
+        await saveAndShareFile(path, "text/csv");
+
+    };
 
 
+    const handleExportPDF = async () => {
+        if (!allRecords?.length) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
 
+        const doc = new jsPDF();
+        let currentY = 10;
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        const header = "Milk Type Summary Report";
+        doc.text(header, (pageWidth - doc.getTextWidth(header)) / 2, currentY);
+        currentY += 10;
+
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Device Code: ${deviceCode}`, 14, currentY);
+        currentY += 6;
+        doc.text(`Date: ${fromDate} to ${toDate}`, 14, currentY);
+        currentY += 8;
+
+        allRecords.forEach((record, recordIndex) => {
+            if (recordIndex > 0) currentY += 6;
+
+            doc.setFont("helvetica", "bold");
+            doc.text(`Date: ${record.date} | Shift: ${record.shift}`, 14, currentY);
+            currentY += 6;
+
+            const tableData = record.milktypeStats?.map((stat: any) => ([
+                stat?.milktype,
+                stat?.totalSamples,
+                stat?.avgFat.toFixed(2),
+                stat?.avgSnf.toFixed(2),
+                stat?.avgClr.toFixed(2),
+
+                stat?.avgRate.toFixed(2),
+                stat?.totalQty.toFixed(2),
+                stat?.totalAmount.toFixed(2),
+                stat?.totalIncentive.toFixed(2),
+                stat?.grandTotal.toFixed(2),
+            ]));
+
+            autoTable(doc, {
+                head: [[
+                    "Milk Type", "Samples", "Avg FAT", "Avg SNF", "Avg CLR", "Avg Rate",
+                    "Total Qty", "Total Amount", "Incentive", "Grand Total"
+                ]],
+                body: tableData,
+                startY: currentY,
+                styles: { fontSize: 9 },
+                theme: "grid",
+            });
+
+            currentY = ((doc as any).lastAutoTable?.finalY || currentY) + 10;
+        });
+
+
+        // Save file
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${(deviceCode || "NA").toString().padStart(4, "0")}_milktype_summary_${getToday()}.pdf`;
+
+        const pdfBase64 = doc.output("datauristring").split(",")[1];
+        await RNFetchBlob.fs.writeFile(path, pdfBase64, "base64");
+
+        ShowToster(toast, `File saved to:\n${path}`, '', 'success');
+        await saveAndShareFile(path, "application/pdf");
+    };
     return (
         <ScrollView style={styles.container}>
             <MemberRecordsFilterSection

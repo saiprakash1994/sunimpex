@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Platform } from "react-native";
+import { Alert, Platform, PermissionsAndroid } from "react-native";
 import RNFS from "react-native-fs";
 import Share from "react-native-share";
 import Papa from "papaparse";
@@ -12,8 +12,8 @@ type Props = {
     date: string;
     shift?: string;
     milkTypeFilter: string;
-    triggerGetRecords: any; // RTK Query hook
     totalCount: number;
+    result: any;
 };
 
 export const useExportHandlers = ({
@@ -21,8 +21,8 @@ export const useExportHandlers = ({
     date,
     shift,
     milkTypeFilter,
-    triggerGetRecords,
     totalCount,
+    result,
 }: Props) => {
     const shiftOrder: Record<string, number> = {
         MORNING: 1,
@@ -31,18 +31,31 @@ export const useExportHandlers = ({
 
     const formatDateDMY = (d: string) => {
         const dt = new Date(d);
-        return `${dt.getDate().toString().padStart(2, "0")}/${(dt.getMonth() + 1).toString().padStart(2, "0")
-            }/${dt.getFullYear()}`;
+        return `${dt.getDate().toString().padStart(2, "0")}/${(dt.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}/${dt.getFullYear()}`;
     };
+
 
     const saveAndShareFile = async (filePath: string, mime: string) => {
         try {
+            const exists = await RNFS.exists(filePath);
+            if (!exists) {
+                Alert.alert("Error", `File not found: ${filePath}`);
+                return;
+            }
+
+            const finalPath = `file://${filePath}`;
+            console.log("Sharing file at:", finalPath);
+
             await Share.open({
-                url: Platform.OS === "android" ? `file://${filePath}` : filePath,
+                url: finalPath,
                 type: mime,
+                failOnCancel: false,
             });
-        } catch (err) {
-            console.log("Share cancelled", err);
+        } catch (err: any) {
+            console.log("Share error", err);
+            Alert.alert("Error", "Unable to share file.");
         }
     };
 
@@ -52,30 +65,10 @@ export const useExportHandlers = ({
             return;
         }
 
-        let allRecords: any[] = [];
-        let allTotals: any[] = [];
 
-        try {
-            const formattedDate = date.split("-").reverse().join("/");
-            const result = await triggerGetRecords({
-                params: {
-                    date: formattedDate,
-                    deviceCode,
-                    ...(shift && { shift }),
-                    page: 1,
-                    limit: 10000,
-                },
-            }).unwrap();
-            allRecords = result?.records || [];
-            allTotals = result?.totals || [];
-        } catch (err: any) {
-            if (err?.status === 429) {
-                Alert.alert("Error", "Too many requests. Please wait.");
-            } else {
-                Alert.alert("Error", "Failed to fetch data for export.");
-            }
-            return;
-        }
+
+        const allRecords: any[] = result?.records || [];
+        const allTotals: any[] = result?.totals || [];
 
         if (!allTotals.length && !allRecords.length) {
             Alert.alert("No Data", "No data available to export.");
@@ -139,12 +132,13 @@ export const useExportHandlers = ({
             combinedCSV += Papa.unparse(totalsData);
         }
 
-        const path = `${RNFS.DocumentDirectoryPath}/Daywise_Report_${deviceCode}_${formatDateDMY(
-            date
-        ).replace(/\//g, "-")}.csv`;
+        // ✅ Save into public Downloads
+        const path = `${RNFS.DownloadDirectoryPath}/Daywise_Report_${deviceCode}_${formatDateDMY(date).replace(/\//g, "-")}.csv`;
+
 
         await RNFS.writeFile(path, combinedCSV, "utf8");
-        saveAndShareFile(path, "text/csv");
+        Alert.alert("Success", `File saved to Downloads:\n${path}`);
+        await saveAndShareFile(path, "text/csv");
     };
 
     const handleExportPDF = async () => {
@@ -153,26 +147,10 @@ export const useExportHandlers = ({
             return;
         }
 
-        let allRecords: any[] = [];
-        let allTotals: any[] = [];
 
-        try {
-            const formattedDate = date.split("-").reverse().join("/");
-            const result = await triggerGetRecords({
-                params: {
-                    date: formattedDate,
-                    deviceCode,
-                    ...(shift && { shift }),
-                    page: 1,
-                    limit: 10000,
-                },
-            }).unwrap();
-            allRecords = result?.records || [];
-            allTotals = result?.totals || [];
-        } catch {
-            Alert.alert("Error", "Failed to fetch data for export.");
-            return;
-        }
+
+        const allRecords: any[] = result?.records || [];
+        const allTotals: any[] = result?.totals || [];
 
         if (!allTotals.length && !allRecords.length) {
             Alert.alert("No Data", "No data available to export.");
@@ -188,8 +166,8 @@ export const useExportHandlers = ({
 
         doc.setFontSize(11).setFont("helvetica", "normal");
         doc.text(
-            `Date: ${formatDateDMY(date)} | Shift: ${shift || "ALL"} | Milk Type: ${milkTypeFilter || "ALL"
-            }`,
+            `Date: ${formatDateDMY(date)} | Shift: ${shift || "ALL"
+            } | Milk Type: ${milkTypeFilter || "ALL"}`,
             14,
             currentY
         );
@@ -216,23 +194,11 @@ export const useExportHandlers = ({
             ]);
             autoTable(doc, {
                 startY: currentY,
-                head: [
-                    [
-                        "S.No",
-                        "Code",
-                        "Milk Type",
-                        "Date",
-                        "Shift",
-                        "Fat",
-                        "SNF",
-                        "CLR",
-                        "Qty (L)",
-                        "Rate",
-                        "Amount",
-                        "Incentive",
-                        "Total",
-                    ],
-                ],
+                head: [[
+                    "S.No", "Code", "Milk Type", "Date", "Shift",
+                    "Fat", "SNF", "CLR", "Qty (L)", "Rate",
+                    "Amount", "Incentive", "Total",
+                ]],
                 body,
                 styles: { fontSize: 7 },
             });
@@ -259,38 +225,25 @@ export const useExportHandlers = ({
 
             autoTable(doc, {
                 startY: currentY,
-                head: [
-                    [
-                        "Milk Type",
-                        "Total Records",
-                        "Avg FAT",
-                        "Avg SNF",
-                        "Avg CLR",
-                        "Total Qty",
-                        "Avg Rate",
-                        "Total Amount",
-                        "Incentive",
-                        "Grand Total",
-                    ],
-                ],
+                head: [[
+                    "Milk Type", "Total Records", "Avg FAT", "Avg SNF", "Avg CLR",
+                    "Total Qty", "Avg Rate", "Total Amount", "Incentive", "Grand Total",
+                ]],
                 body: totalsTable,
                 styles: { fontSize: 8 },
                 theme: "striped",
             });
         }
 
-        const pdfOutput = doc.output("arraybuffer");
-        const path = `${RNFS.DocumentDirectoryPath}/Daywise_Report_${deviceCode}_${formatDateDMY(
-            date
-        ).replace(/\//g, "-")}.pdf`;
+        const pdfBase64 = doc.output("datauristring").split(",")[1];
 
-        await RNFetchBlob.fs.writeFile(
-            path,
-            new Uint8Array(pdfOutput).toString(),
-            "ascii"
-        );
+        // ✅ Save into public Downloads
+        const path = `${RNFS.DownloadDirectoryPath}/Daywise_Report_${deviceCode}_${formatDateDMY(date).replace(/\//g, "-")}.pdf`;
 
-        saveAndShareFile(path, "application/pdf");
+
+        await RNFetchBlob.fs.writeFile(path, pdfBase64, "base64");
+        Alert.alert("Success", `File saved to Downloads:\n${path}`);
+        await saveAndShareFile(path, "application/pdf");
     };
 
     return { handleExportCSV, handleExportPDF };

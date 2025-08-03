@@ -7,12 +7,12 @@ import {
     FlatList,
     ScrollView,
     Image,
+    Platform,
 } from "react-native";
 import { useSelector } from "react-redux";
 
 import debounce from "lodash.debounce";
 import { useToast } from "react-native-toast-notifications";
-import { useMemberExportHandlers } from "../utils/useMemberExportHandlers";
 import ExportButtonsSection from "../utils/ExportButtonsSection";
 import MemberRecordsFilterSection from "../utils/MemberRecordsFilterSection";
 import { UserTypeHook } from "../../../../shared/hooks/userTypeHook";
@@ -21,7 +21,13 @@ import { useGetAllDevicesQuery, useGetDeviceByCodeQuery, useGetDeviceByIdQuery }
 import { useLazyGetDatewiseDetailedReportQuery } from "../../store/recordEndPoint";
 import { ShowToster } from "../../../../shared/components/ShowToster";
 import { TEXT_COLORS, THEME_COLORS } from "../../../../globalStyle/GlobalStyles";
-
+import RNFS from "react-native-fs";
+import Share from "react-native-share";
+import Papa from "papaparse";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import RNFetchBlob from "react-native-blob-util";
+import { Path } from "react-native-svg";
 const getToday = () => new Date().toISOString().split("T")[0];
 
 const DailyRecordCard: React.FC<{ dailyRecord: any; index: number }> = ({ dailyRecord, index }) => (
@@ -184,18 +190,6 @@ const DatewiseDetailedRecords: React.FC = () => {
     }, [deviceCode, memberCodes]);
 
 
-    const { handleExportCSV, handleExportPDF } = useMemberExportHandlers({
-        deviceCode,
-        fromDate,
-        toDate,
-        startMember,
-        endMember,
-        milkTypeFilter,
-        shift,
-        triggerGetRecords,
-        totalCount,
-        reportType: 'detailed',
-    });
 
 
 
@@ -210,6 +204,205 @@ const DatewiseDetailedRecords: React.FC = () => {
         return dateA - dateB;
     });
 
+    const saveAndShareFile = async (filePath: string, mime: string) => {
+        try {
+            const exists = await RNFS.exists(filePath);
+            if (!exists) {
+                ShowToster(toast, `File not found: ${filePath}`, '', 'error');
+                return;
+            }
+
+            const finalPath = `file://${filePath}`;
+            console.log("Sharing file at:", finalPath);
+
+            await Share.open({
+                url: finalPath,
+                type: mime,
+                failOnCancel: false,
+            });
+        } catch (err: any) {
+            console.log("Share error", err);
+            ShowToster(toast, "Unable to share file.", '', 'error');
+        }
+    };
+
+    const handleExportCSV = async () => {
+        if (!allRecords?.length) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
+
+        let combinedCSV = "";
+
+        // Header Info
+        const header = [
+            [`Device Code: ${deviceCode}`],
+            [`Members: ${startMember} to ${endMember}`],
+            [`Records from ${fromDate} to ${toDate}`],
+            [],
+        ];
+        combinedCSV += Papa.unparse(header, { quotes: true }) + "\n";
+
+        allRecords.forEach((day, dayIndex) => {
+            combinedCSV += `Date: ${day.date}, Shift: ${day.shift}, Device: ${deviceCode}\n\n`;
+
+            if (day?.records?.length) {
+                const dailyMemberRows = day?.records?.map((stat: any) => ({
+                    Code: stat?.CODE,
+                    MilkType: stat?.MILKTYPE,
+                    FAT: stat?.FAT,
+                    SNF: stat?.SNF,
+                    CLR: stat?.CLR,
+
+                    Rate: stat?.RATE,
+                    Quantity: stat?.QTY,
+                    IncentiveAmount: stat?.INCENTIVEAMOUNT,
+                    TotalAmount: stat?.TOTALAMOUNT,
+                }));
+
+                combinedCSV += "Member Records:\n";
+                combinedCSV += Papa.unparse(dailyMemberRows) + "\n\n";
+            }
+
+            // Milk Type Summary
+            if (day?.milktypeStats?.length) {
+                const summaryRows = day?.milktypeStats?.map((stat: any) => ({
+                    MilkType: stat?.milktype,
+                    Samples: stat?.totalSamples,
+                    AvgFAT: stat?.avgFat.toFixed(2),
+                    AvgSNF: stat?.avgSnf.toFixed(2),
+                    AvgCLR: stat?.avgClr.toFixed(2),
+
+                    AvgRate: stat?.avgRate.toFixed(2),
+                    TotalQty: stat?.totalQty.toFixed(2),
+                    TotalAmount: stat?.totalAmount.toFixed(2),
+                    Incentive: stat?.totalIncentive.toFixed(2),
+                    GrandTotal: stat?.grandTotal.toFixed(2),
+                }));
+
+                combinedCSV += "Summary Totals:\n";
+                combinedCSV += Papa.unparse(summaryRows) + "\n\n";
+            }
+        });
+
+        // File Path
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${deviceCode}_datewise_detailed_${getToday().replace(/\//g, "-")}.csv`;
+
+        await RNFS.writeFile(path, combinedCSV, "utf8");
+        ShowToster(toast, `File saved to:\n${path}`, '', 'success');
+        await saveAndShareFile(path, "text/csv");
+
+
+    };
+    const handleExportPDF = async () => {
+        if (!allRecords?.length) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
+
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        let currentY = 10;
+
+        // Title
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        const title = "Datewise Detailed";
+        doc.text(title, (pageWidth - doc.getTextWidth(title)) / 2, currentY);
+        currentY += 10;
+
+        // Header
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Device Code: ${deviceCode}`, 14, currentY);
+        doc.text(`Members: ${startMember} to ${endMember}`, pageWidth - 80, currentY);
+        currentY += 8;
+        doc.text(`Date Range: ${fromDate} to ${toDate}`, 14, currentY);
+        currentY += 10;
+
+        allRecords.forEach((day) => {
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Date: ${day.date} | Shift: ${day.shift}`, 14, currentY);
+            currentY += 6;
+
+            if (day.records?.length) {
+                const memberTable = day?.records?.map((stat: any) => [
+                    stat?.CODE,
+                    stat?.MILKTYPE,
+                    stat?.FAT,
+                    stat?.SNF,
+                    stat?.CLR,
+
+                    stat?.RATE,
+                    stat?.QTY,
+                    stat?.INCENTIVEAMOUNT,
+                    stat?.TOTALAMOUNT,
+                ]);
+
+                autoTable(doc, {
+                    head: [[
+                        "Code", "Milk Type", "FAT", "SNF", "CLR", "Rate", "Qty", "Incentive", "Total"
+                    ]],
+                    body: memberTable,
+                    startY: currentY,
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [41, 128, 185] },
+                    theme: "grid",
+                });
+
+                currentY = (doc as any).lastAutoTable.finalY + 8;
+            }
+
+            if (day.milktypeStats?.length) {
+                const summaryTable = day?.milktypeStats?.map((stat: any) => [
+                    stat?.milktype,
+                    stat?.totalSamples,
+                    stat?.avgFat.toFixed(2),
+                    stat?.avgSnf.toFixed(2),
+                    stat?.avgClr.toFixed(2),
+
+                    stat?.avgRate.toFixed(2),
+                    stat?.totalQty.toFixed(2),
+                    stat?.totalAmount.toFixed(2),
+                    stat?.totalIncentive.toFixed(2),
+                    stat?.grandTotal.toFixed(2),
+                ]);
+
+                autoTable(doc, {
+                    head: [[
+                        "Milk Type", "Samples", "Avg FAT", "Avg SNF", "Avg CLR", "Avg Rate", "Total Qty",
+                        "Total Amount", "Incentive", "Grand Total"
+                    ]],
+                    body: summaryTable,
+                    startY: currentY,
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [39, 174, 96] },
+                    theme: "striped",
+                });
+
+                currentY = (doc as any).lastAutoTable.finalY + 10;
+            }
+        });
+
+        // Save file
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${(deviceCode || "NA").toString().padStart(4, "0")}__datewise_detailed_${getToday()}.pdf`;
+
+        const pdfBase64 = doc.output("datauristring").split(",")[1];
+        await RNFetchBlob.fs.writeFile(path, pdfBase64, "base64");
+
+        ShowToster(toast, `File saved to:\n${path}`, '', 'success');
+        await saveAndShareFile(path, "application/pdf");
+
+    };
 
 
     return (

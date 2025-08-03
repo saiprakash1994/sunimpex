@@ -7,11 +7,12 @@ import {
     FlatList,
     ScrollView,
     Image,
+    Alert,
+    Platform,
 } from "react-native";
 import { useSelector } from "react-redux";
 import debounce from "lodash.debounce";
 import { useToast } from "react-native-toast-notifications";
-import { useMemberExportHandlers } from "../utils/useMemberExportHandlers";
 import ExportButtonsSection from "../utils/ExportButtonsSection";
 import MemberRecordsFilterSection from "../utils/MemberRecordsFilterSection";
 import { UserTypeHook } from "../../../../shared/hooks/userTypeHook";
@@ -20,8 +21,13 @@ import { useGetAllDevicesQuery, useGetDeviceByCodeQuery, useGetDeviceByIdQuery }
 import { useLazyGetMemberCodewiseReportQuery } from "../../store/recordEndPoint";
 import { ShowToster } from "../../../../shared/components/ShowToster";
 import { TEXT_COLORS, THEME_COLORS } from "../../../../globalStyle/GlobalStyles";
-import { ThemeProvider } from "@react-navigation/native";
-
+import RNFS from "react-native-fs";
+import Share from "react-native-share";
+import Papa from "papaparse";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import RNFetchBlob from "react-native-blob-util";
+import { Path } from "react-native-svg";
 const getToday = () => new Date().toISOString().split("T")[0];
 
 const MemberRecords: React.FC = () => {
@@ -109,7 +115,6 @@ const MemberRecords: React.FC = () => {
                     limit: 10000,
                 },
             }).unwrap();
-            console.log(result, 'res')
             setAllRecords(result?.records || []);
             setTotals(result?.totals || []);
             setTotalCount(result?.records?.length || 0);
@@ -135,16 +140,7 @@ const MemberRecords: React.FC = () => {
         }
     }, [memberCodes, deviceCode]);
 
-    const { handleExportCSV, handleExportPDF } = useMemberExportHandlers({
-        deviceCode,
-        memberCode,
-        fromDate,
-        toDate,
-        milkTypeFilter,
-        triggerGetRecords,
-        totalCount,
-        reportType: 'member',
-    });
+
 
     const filteredRecords =
         milkTypeFilter === "ALL"
@@ -221,6 +217,201 @@ const MemberRecords: React.FC = () => {
             </View>
         </View>
     );
+    const saveAndShareFile = async (filePath: string, mime: string) => {
+        try {
+            const exists = await RNFS.exists(filePath);
+            if (!exists) {
+                ShowToster(toast, `File not found: ${filePath}`, '', 'error');
+                return;
+            }
+
+            const finalPath = `file://${filePath}`;
+            console.log("Sharing file at:", finalPath);
+
+            await Share.open({
+                url: finalPath,
+                type: mime,
+                failOnCancel: false,
+            });
+        } catch (err: any) {
+            console.log("Share error", err);
+            ShowToster(toast, "Unable to share file.", '', 'error');
+        }
+    };
+
+    const handleExportCSV = async () => {
+        if (!totals?.length && !allRecords?.length) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
+
+        let combinedCSV = "";
+        const sanitize = (val: any) => `"${(val ?? "").toString().replace(/"/g, '""')}"`;
+
+        // Header Info
+        combinedCSV += `Device Code:,${sanitize(deviceCode)}\n`;
+        combinedCSV += `Member Code:,${sanitize((memberCode || "").toString().padStart(4, "0"))}\n`;
+        combinedCSV += `Member Records From,${sanitize(fromDate)},To,${sanitize(toDate)}\n\n`;
+
+        // Records Section
+        if (allRecords?.length) {
+            const recordsCSVData = allRecords.map((rec, index) => ({
+                "S.No": index + 1,
+                Date: rec?.SAMPLEDATE || "",
+                Shift: rec?.SHIFT || "",
+                "Milk Type": rec?.MILKTYPE || "",
+                Fat: rec?.FAT ?? "",
+                SNF: rec?.SNF ?? "",
+                CLR: rec?.CLR ?? "",
+                Qty: rec?.QTY ?? "",
+                Rate: rec?.RATE ?? "",
+                Amount: Number(rec?.AMOUNT ?? 0).toFixed(2),
+                Incentive: Number(rec?.INCENTIVEAMOUNT ?? 0).toFixed(2),
+                "Grand Total": Number(rec?.TOTAL ?? 0).toFixed(2),
+            }));
+            combinedCSV += "Record Summary:\n";
+            combinedCSV += Papa.unparse(recordsCSVData) + "\n\n";
+        }
+
+        // Totals Section
+        if (totals?.length) {
+            const totalsCSVData = totals.map((total) => ({
+                "Milk Type": total?._id?.milkType || "",
+                "Total Samples": total?.totalRecords ?? "",
+                "Avg FAT": total?.averageFat ?? "",
+                "Avg SNF": total?.averageSNF ?? "",
+                "Avg CLR": total?.averageCLR ?? "",
+                "Total Qty": total?.totalQuantity ?? "",
+                "Avg Rate": total?.averageRate ?? "",
+                "Total Amount": Number(total?.totalAmount ?? 0).toFixed(2),
+                "Total Incentive": Number(total?.totalIncentive ?? 0).toFixed(2),
+                "Grand Total": (
+                    Number(total?.totalAmount ?? 0) +
+                    Number(total?.totalIncentive ?? 0)
+                ).toFixed(2),
+            }));
+            combinedCSV += "Total Summary:\n";
+            combinedCSV += Papa.unparse(totalsCSVData);
+        }
+
+        // File Path
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${(memberCode || "NA")}_Memberwise_Report_${deviceCode}_${getToday().replace(/\//g, "-")}.csv`;
+
+        await RNFS.writeFile(path, combinedCSV, "utf8");
+        ShowToster(toast, `File saved to:\n${path}`, '', 'success');
+        await saveAndShareFile(path, "text/csv");
+    };
+
+
+    const handleExportPDF = async () => {
+        if (!totals?.length && !allRecords?.length) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
+
+        const doc = new jsPDF();
+        let currentY = 10;
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        // Title
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        const title = "MEMBERWISE REPORT";
+        doc.text(title, (pageWidth - doc.getTextWidth(title)) / 2, currentY);
+
+        // Header info
+        currentY += 10;
+        doc.setFontSize(12);
+        doc.text(`Device Code: ${deviceCode}`, 14, currentY);
+
+        const memberCodeText = `Member Code: ${(memberCode || "").toString().padStart(4, "0")}`;
+        doc.text(memberCodeText, pageWidth - 14 - doc.getTextWidth(memberCodeText), currentY);
+
+        currentY += 7;
+        doc.text(`Records From: ${fromDate} To: ${toDate}`, 14, currentY);
+
+        // Records Table
+        if (allRecords?.length) {
+            const recordsTable = allRecords.map((record, index) => [
+                index + 1,
+                record?.SAMPLEDATE || "",
+                record?.SHIFT || "",
+                record?.MILKTYPE || "",
+                record?.FAT ?? "",
+                record?.SNF ?? "",
+                record?.CLR ?? "",
+                record?.QTY ?? "",
+                record?.RATE ?? "",
+                Number(record?.AMOUNT ?? 0).toFixed(2),
+                Number(record?.INCENTIVEAMOUNT ?? 0).toFixed(2),
+                Number(record?.TOTAL ?? 0).toFixed(2),
+            ]);
+
+            autoTable(doc, {
+                startY: currentY + 6,
+                head: [[
+                    "S.No", "Date", "Shift", "Milk Type", "Fat", "Snf", "Clr",
+                    "Qty", "Rate", "Amount", "Incentive", "Grand Total",
+                ]],
+                body: recordsTable,
+                theme: "grid",
+                styles: { fontSize: 9 },
+            });
+
+            currentY = (doc as any).lastAutoTable.finalY + 10;
+        }
+
+        // Totals Table
+        if (totals?.length) {
+            doc.setFontSize(12);
+            doc.text("Summary:", 14, currentY);
+
+            const totalsTable = totals.map((total) => [
+                total?._id?.milkType || "",
+                total?.totalRecords ?? "",
+                total?.averageFat ?? "",
+                total?.averageSNF ?? "",
+                total?.averageCLR ?? "",
+                total?.totalQuantity ?? "",
+                total?.averageRate ?? "",
+                Number(total?.totalAmount ?? 0).toFixed(2),
+                Number(total?.totalIncentive ?? 0).toFixed(2),
+                (
+                    Number(total?.totalAmount ?? 0) +
+                    Number(total?.totalIncentive ?? 0)
+                ).toFixed(2),
+            ]);
+
+            autoTable(doc, {
+                startY: currentY + 6,
+                head: [[
+                    "Milk Type", "Total Samples", "Avg FAT", "Avg SNF", "Avg CLR",
+                    "Total Qty", "Avg Rate", "Total Amount", "Total Incentive", "Grand Total",
+                ]],
+                body: totalsTable,
+                theme: "striped",
+                styles: { fontSize: 9 },
+            });
+        }
+
+        // Save file
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${(memberCode || "NA").toString().padStart(4, "0")}_Memberwise_Report_${getToday()}.pdf`;
+
+        const pdfBase64 = doc.output("datauristring").split(",")[1];
+        await RNFetchBlob.fs.writeFile(path, pdfBase64, "base64");
+
+        ShowToster(toast, `File saved to:\n${path}`, '', 'success');
+        await saveAndShareFile(path, "application/pdf");
+    };
+
 
     return (
         <ScrollView style={styles.container}>

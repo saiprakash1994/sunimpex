@@ -6,11 +6,12 @@ import {
     ActivityIndicator,
     FlatList,
     ScrollView,
+    Platform,
+    Alert,
 } from "react-native";
 import { useSelector } from "react-redux";
 import debounce from "lodash.debounce";
 import { useToast } from "react-native-toast-notifications";
-import { useMemberExportHandlers } from "../utils/useMemberExportHandlers";
 import ExportButtonsSection from "../utils/ExportButtonsSection";
 import MemberRecordsFilterSection from "../utils/MemberRecordsFilterSection";
 import { UserTypeHook } from "../../../../shared/hooks/userTypeHook";
@@ -19,6 +20,13 @@ import { useGetAllDevicesQuery, useGetDeviceByCodeQuery } from "../../../device/
 import { useLazyGetAbsentMemberReportQuery } from "../../store/recordEndPoint";
 import { ShowToster } from "../../../../shared/components/ShowToster";
 import { TEXT_COLORS, THEME_COLORS } from "../../../../globalStyle/GlobalStyles";
+import Papa from "papaparse";
+import RNFS from "react-native-fs";
+import Share from "react-native-share";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import RNFetchBlob from "react-native-blob-util";
+import { Path } from "react-native-svg";
 
 const getToday = () => new Date().toISOString().split("T")[0];
 
@@ -98,15 +106,7 @@ const AbsentMemberRecords: React.FC = () => {
         trailing: false,
     });
 
-    const { handleExportCSV, handleExportPDF } = useMemberExportHandlers({
-        deviceCode,
-        date,
-        shift,
-        milkTypeFilter: "",
-        triggerGetRecords,
-        totalCount,
-        reportType: "absent",
-    });
+
 
     const sortedRecords = [...allRecords].sort((a, b) =>
         String(a.CODE).localeCompare(String(b.CODE))
@@ -152,6 +152,146 @@ const AbsentMemberRecords: React.FC = () => {
             </View>
         </View>
     );
+    const saveAndShareFile = async (filePath: string, mime: string) => {
+        try {
+            const exists = await RNFS.exists(filePath);
+            if (!exists) {
+                ShowToster(toast, `File not found: ${filePath}`, '', 'error');
+                return;
+            }
+
+            const finalPath = `file://${filePath}`;
+            console.log("Sharing file at:", finalPath);
+
+            await Share.open({
+                url: finalPath,
+                type: mime,
+                failOnCancel: false,
+            });
+        } catch (err: any) {
+            console.log("Share error", err);
+            ShowToster(toast, "Unable to share file.", '', 'error');
+        }
+    };
+
+    const handleExportCSV = async () => {
+        if (totalCount === 0) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
+
+        let csv = "";
+
+        if (allRecords?.length > 0) {
+            const memberCSV = allRecords?.map((rec, index) => ({
+                "S.No": index + 1,
+                "Member Code": rec?.CODE,
+                "Milk Type": rec?.MILKTYPE === "C" ? "COW" : "BUFFALO",
+                "Member Name": rec?.MEMBERNAME || "",
+            }));
+            csv += `Absent Members Report\nDate: ${date}, Shift: ${shift}, Device Code: ${deviceCode}\n`;
+            csv += Papa.unparse(memberCSV);
+
+            csv += "\n\n";
+        }
+
+        const summary = [
+            {
+                "Total Members": totals?.[0]?.totalMembers,
+                "Present Members": totals?.[0]?.presentCount,
+                "Absent Members": totals?.[0]?.absentCount,
+                "Cow Absent": totals?.[0]?.cowAbsentCount,
+                "Buffalo Absent": totals?.[0]?.bufAbsentCount,
+            },
+        ];
+        csv += `Summary\n`;
+        csv += Papa.unparse(summary);
+
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${(deviceCode)}_Absent_Members_Report${deviceCode}_${getToday().replace(/\//g, "-")}.csv`;
+
+        await RNFS.writeFile(path, csv, "utf8");
+        Alert.alert("Success", `File saved to:\n${path}`);
+        await saveAndShareFile(path, "text/csv");
+
+    };
+
+    const handleExportPDF = async () => {
+        if (totalCount === 0) {
+            Alert.alert("No data available to export.");
+            return;
+        }
+
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        let y = 10;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        const title = "Absent Members Report";
+        doc.text(title, (pageWidth - doc.getTextWidth(title)) / 2, y);
+        y += 10;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text(`Date: ${date}`, 14, y);
+        doc.text(`Shift: ${shift}`, pageWidth - 50, y);
+        y += 6;
+        doc.text(`Device Code: ${deviceCode}`, 14, y);
+        y += 8;
+
+        if (allRecords?.length > 0) {
+            const tableData = allRecords?.map((rec, i) => [
+                i + 1,
+                rec?.CODE,
+                rec?.MILKTYPE === "C" ? "COW" : "BUFFALO",
+                rec?.MEMBERNAME || "",
+            ]);
+
+            autoTable(doc, {
+                startY: y,
+                head: [["S.No", "Member Code", "Milk Type", "Member Name"]],
+                body: tableData,
+                styles: { fontSize: 10 },
+                theme: "grid",
+            });
+
+            y = (doc as any).lastAutoTable.finalY + 10;
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("Summary", 14, y);
+        y += 6;
+
+        const summaryTable = [
+            [totals?.[0].totalMembers, totals?.[0].presentCount, totals?.[0].absentCount, totals?.[0].cowAbsentCount, totals?.[0].bufAbsentCount],
+        ];
+
+        autoTable(doc, {
+            startY: y,
+            head: [["Total Members", "Present", "Absent", "Cow Absent", "Buffalo Absent"]],
+            body: summaryTable,
+            styles: { fontSize: 10 },
+            theme: "striped",
+        });
+
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${deviceCode}_Absent_Members_Report_${date}_${shift}.pdf`;
+
+        const pdfBase64 = doc.output("datauristring").split(",")[1];
+        await RNFetchBlob.fs.writeFile(path, pdfBase64, "base64");
+
+        Alert.alert("Success", `File saved to:\n${path}`);
+        await saveAndShareFile(path, "application/pdf");
+
+    };
 
     return (
         <ScrollView style={styles.container}>

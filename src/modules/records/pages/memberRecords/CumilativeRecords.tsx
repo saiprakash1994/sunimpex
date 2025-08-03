@@ -7,11 +7,11 @@ import {
     FlatList,
     ScrollView,
     Image,
+    Platform,
 } from "react-native";
 import { useSelector } from "react-redux";
 import debounce from "lodash.debounce";
 import { useToast } from "react-native-toast-notifications";
-import { useMemberExportHandlers } from "../utils/useMemberExportHandlers";
 import ExportButtonsSection from "../utils/ExportButtonsSection";
 import MemberRecordsFilterSection from "../utils/MemberRecordsFilterSection";
 import { UserTypeHook } from "../../../../shared/hooks/userTypeHook";
@@ -20,7 +20,13 @@ import { useGetAllDevicesQuery, useGetDeviceByCodeQuery, useGetDeviceByIdQuery }
 import { useLazyGetCumulativeReportQuery } from "../../store/recordEndPoint";
 import { ShowToster } from "../../../../shared/components/ShowToster";
 import { TEXT_COLORS, THEME_COLORS } from "../../../../globalStyle/GlobalStyles";
-
+import RNFS from "react-native-fs";
+import Share from "react-native-share";
+import Papa from "papaparse";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import RNFetchBlob from "react-native-blob-util";
+import { Path } from "react-native-svg";
 const getToday = () => new Date().toISOString().split("T")[0];
 
 const CumilativeRecords: React.FC = () => {
@@ -113,6 +119,7 @@ const CumilativeRecords: React.FC = () => {
                     limit: 10000,
                 },
             }).unwrap();
+            console.log(result, 'res')
             setAllRecords(result?.data || []);
             setTotals(result?.milkTypeTotals || []);
             setTotalCount(result?.data?.length || 0);
@@ -135,6 +142,11 @@ const CumilativeRecords: React.FC = () => {
         grandTotalAmount = 0,
         grandTotal = 0,
     } = data || {};
+    const cowMilkTypeTotals =
+        data?.milkTypeTotals.filter((cow: any) => cow?.MILKTYPE === "COW") || [];
+    const bufMilkTypeTotals =
+        data?.milkTypeTotals.filter((buf: any) => buf?.MILKTYPE === "BUF") || [];
+
     useEffect(() => {
         if (memberCodes.length > 0) {
             const firstMember = memberCodes[0];
@@ -152,18 +164,6 @@ const CumilativeRecords: React.FC = () => {
     const debouncedHandleSearch = debounce(handleSearch, 600, {
         leading: true,
         trailing: false,
-    });
-
-    const { handleExportCSV, handleExportPDF } = useMemberExportHandlers({
-        deviceCode,
-        startMember,
-        endMember,
-        fromDate,
-        toDate,
-        milkTypeFilter,
-        triggerGetRecords,
-        totalCount,
-        reportType: 'cumulative',
     });
 
     const filteredRecords =
@@ -300,6 +300,276 @@ const CumilativeRecords: React.FC = () => {
             </View>
         </View>
     );
+    const saveAndShareFile = async (filePath: string, mime: string) => {
+        try {
+            const exists = await RNFS.exists(filePath);
+            if (!exists) {
+                ShowToster(toast, `File not found: ${filePath}`, '', 'error');
+                return;
+            }
+
+            const finalPath = `file://${filePath}`;
+            console.log("Sharing file at:", finalPath);
+
+            await Share.open({
+                url: finalPath,
+                type: mime,
+                failOnCancel: false,
+            });
+        } catch (err: any) {
+            console.log("Share error", err);
+            ShowToster(toast, "Unable to share file.", '', 'error');
+        }
+    };
+    const handleExportCSV = async () => {
+        if (totalMembers === 0) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
+
+        let csvSections = [];
+        const sanitize = (val: any) => `"${(val ?? "").toString().replace(/"/g, '""')}"`;
+
+        // Header
+        csvSections.push(`Device Code: ${deviceCode}`);
+        csvSections.push(`Members: ${filterStartMember} to ${filterEndMember}`);
+        csvSections.push(`Date Range: ${fromDate} to ${toDate}`);
+        csvSections.push(""); // spacer
+
+        // Member Records
+        if (totalCount > 0) {
+            const recordsCSVData = allRecords?.map((record, index) => ({
+                SNO: index + 1,
+                MemberCode: record?.CODE,
+                MilkType: record?.MILKTYPE,
+                AvgFAT: record?.avgFat,
+                AvgSNF: record?.avgSnf,
+                avgClr: record?.avgClr,
+                TotalQty: record?.totalQty,
+                AvgRate: record?.avgRate,
+                TotalAmount: record?.totalAmount,
+                TotalIncentive: record?.totalIncentive,
+                GrandTotal: record?.grandTotal,
+            }));
+
+            csvSections.push("=== Member-wise Records ===");
+            csvSections.push(Papa.unparse(recordsCSVData));
+            csvSections.push(""); // spacer
+        }
+
+        // COW Totals
+        if (cowMilkTypeTotals?.length) {
+            const cowData = cowMilkTypeTotals?.map((cow: any) => ({
+                MilkType: cow?.MILKTYPE,
+                MemberCount: cow?.memberCount,
+                AvgFAT: cow?.avgFat,
+                AvgSNF: cow?.avgSnf,
+                AvgCLR: cow?.avgClr,
+                TotalQty: cow?.totalQty,
+                TotalAmount: cow?.totalAmount,
+                TotalIncentive: cow?.totalIncentive,
+                GrandTotal: cow?.grandTotal,
+            }));
+
+            csvSections.push("=== COW Totals ===");
+            csvSections.push(Papa.unparse(cowData));
+            csvSections.push("");
+        }
+
+        // BUF Totals
+        if (bufMilkTypeTotals?.length) {
+            const bufData = bufMilkTypeTotals?.map((buf: any) => ({
+                MilkType: buf?.MILKTYPE,
+                MemberCount: buf?.memberCount,
+                AvgFAT: buf?.avgFat,
+                AvgSNF: buf?.avgSnf,
+                AvgCLR: buf?.avgClr,
+                TotalQty: buf?.totalQty,
+                TotalAmount: buf?.totalAmount,
+                TotalIncentive: buf?.totalIncentive,
+                GrandTotal: buf?.grandTotal,
+            }));
+
+            csvSections.push("=== BUF Totals ===");
+            csvSections.push(Papa.unparse(bufData));
+            csvSections.push("");
+        }
+
+        // Grand Total
+        csvSections.push("=== Overall Totals ===");
+        csvSections.push(
+            Papa.unparse([
+                {
+                    MilkType: "TOTAL",
+                    MemberCount: totalMembers,
+                    AvgFat: grandAvgFat,
+                    AvgSnf: grandAvgSnf,
+                    AvgClr: grandAvgClr,
+                    TotalQty: grandTotalQty,
+                    TotalAmount: grandTotalAmount,
+                    TotalIncentive: grandTotalIncentive,
+                    GrandTotal: grandTotal,
+                },
+            ])
+        );
+
+        // File Path
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${deviceCode}_Payment_Register.csv_${getToday().replace(/\//g, "-")}.csv`;
+
+        await RNFS.writeFile(path, csvSections.join("\n"), "utf8");
+        ShowToster(toast, `File saved to:\n${path}`, '', 'success');
+        await saveAndShareFile(path, "text/csv");
+    };
+
+
+    const handleExportPDF = async () => {
+        if (totalMembers === 0) {
+            ShowToster(toast, "No data available to export.", '', 'error');
+            return;
+        }
+
+        const doc = new jsPDF();
+        let currentY = 10;
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const centerText = (text: any, y: any) => {
+            const textWidth = doc.getTextWidth(text);
+            const x = (pageWidth - textWidth) / 2;
+            doc.text(text, x, y);
+        };
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        centerText("Payment Register", currentY);
+        currentY += 8;
+
+        doc.setFontSize(12);
+        doc.text(`Device Code: ${deviceCode}`, 14, currentY);
+        doc.text(`Members: ${filterStartMember} to ${filterEndMember}`, pageWidth - 90, currentY);
+        currentY += 6;
+        doc.text(`Date Range: ${fromDate} to ${toDate}`, 14, currentY);
+        currentY += 6;
+
+        // Member-wise Table
+        if (allRecords?.length) {
+            const memberTable = allRecords?.map((record, index) => [
+                index + 1,
+                record?.CODE,
+                record?.MILKTYPE,
+                record?.totalQty,
+                record?.avgRate,
+                record?.totalAmount,
+                record?.totalIncentive,
+                record?.grandTotal,
+            ]);
+
+            autoTable(doc, {
+                head: [
+                    [
+                        "S.No",
+                        "Member Code",
+                        "Milk Type",
+                        "Total Qty",
+                        "Avg Rate",
+                        "Total Amount",
+                        "Total Incentive",
+                        "Grand Total",
+                    ],
+                ],
+                body: memberTable,
+                startY: currentY,
+                styles: { fontSize: 8 },
+                theme: "striped",
+            });
+
+            currentY = (doc as any).lastAutoTable.finalY + 8;
+        }
+
+        const renderSection = (title: any, data: any, startY: any) => {
+            if (!data?.length) return startY;
+
+            doc.setFontSize(11);
+            doc.text(title, 14, startY);
+            startY += 4;
+
+            const tableData = data?.map((item: any) => [
+                item.memberCount,
+                item.MILKTYPE,
+                item.totalQty,
+                item.totalAmount,
+                item.totalIncentive,
+                item.grandTotal,
+            ]);
+
+            autoTable(doc, {
+                head: [
+                    [
+                        "Member Count",
+                        "Milk Type",
+                        "Total Qty",
+                        "Total Amount",
+                        "Total Incentive",
+                        "Grand Total",
+                    ],
+                ],
+                body: tableData,
+                startY,
+                styles: { fontSize: 9 },
+                theme: "grid",
+            });
+
+            return (doc as any).lastAutoTable.finalY + 8;
+        };
+
+        currentY = renderSection("COW Totals", cowMilkTypeTotals, currentY);
+        currentY = renderSection("BUF Totals", bufMilkTypeTotals, currentY);
+
+        // Grand Total
+        doc.text("Overall Totals", 14, currentY);
+        currentY += 4;
+
+        autoTable(doc, {
+            head: [
+                [
+                    "Total Members",
+                    "Total Qty",
+                    "Total Incentive",
+                    "Total Amount",
+                    "Grand Total",
+                ],
+            ],
+            body: [
+                [
+                    totalMembers,
+                    grandTotalQty,
+                    grandTotalIncentive,
+                    grandTotalAmount,
+                    grandTotal,
+                ],
+            ],
+            startY: currentY,
+            styles: { fontSize: 9 },
+            theme: "grid",
+        });
+
+        const downloadPath = Platform.OS === "android"
+            ? RNFS.DownloadDirectoryPath
+            : RNFS.DocumentDirectoryPath;
+
+        const path = `${downloadPath}/${deviceCode}_Payment_Register_${getToday()}.pdf`;
+
+        const pdfBase64 = doc.output("datauristring").split(",")[1];
+        await RNFetchBlob.fs.writeFile(path, pdfBase64, "base64");
+
+        ShowToster(toast, `File saved to:\n${path}`, '', 'success');
+        await saveAndShareFile(path, "application/pdf");
+
+        doc.save(`${deviceCode}_Payment_Register.pdf`);
+    };
 
     return (
         <ScrollView style={styles.container}>
