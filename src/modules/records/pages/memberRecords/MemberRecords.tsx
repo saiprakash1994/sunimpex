@@ -132,7 +132,7 @@ const MemberRecords: React.FC = () => {
     });
 
     useEffect(() => {
-        if (memberCodes.length > 0) {
+        if (memberCodes?.length > 0) {
             const firstMember = memberCodes[0];
             setFilterMemberCode(firstMember?.CODE);
         } else {
@@ -148,8 +148,8 @@ const MemberRecords: React.FC = () => {
             : allRecords?.filter((r) => r?.MILKTYPE === milkTypeFilter);
 
     const sortedRecords = [...filteredRecords].sort((a, b) => {
-        const dateA = new Date(a.SAMPLEDATE).getTime();
-        const dateB = new Date(b.SAMPLEDATE).getTime();
+        const dateA = new Date(a?.SAMPLEDATE).getTime();
+        const dateB = new Date(b?.SAMPLEDATE).getTime();
         return dateA - dateB;
     });
 
@@ -174,7 +174,7 @@ const MemberRecords: React.FC = () => {
 
     const renderTotalItem = ({ item }: { item: any }) => (
         <View style={styles.totalCard}>
-            <Text style={styles.totalTitle}>{item._id?.milkType} Milk</Text>
+            <Text style={styles.totalTitle}>{item?._id?.milkType} Milk</Text>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Samples:</Text>
                 <Text style={styles.totalValue}>{item?.totalRecords}</Text>
@@ -206,7 +206,7 @@ const MemberRecords: React.FC = () => {
             <View style={styles.totalRow}>
                 <Text style={[styles.totalValue, { color: "green" }]}>Incentive:</Text>
                 <Text style={[styles.totalValue, { color: "green" }]}>
-                    ₹{item.totalIncentive}
+                    ₹{item?.totalIncentive}
                 </Text>
             </View>
             <View style={[styles.totalRow, styles.grandTotalRow]}>

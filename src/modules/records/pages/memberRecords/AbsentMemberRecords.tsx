@@ -31,12 +31,12 @@ import { Path } from "react-native-svg";
 const getToday = () => new Date().toISOString().split("T")[0];
 
 const AbsentMemberRecords: React.FC = () => {
-    const userInfo = useSelector((state: any) => state.userInfoSlice.userInfo);
+    const userInfo = useSelector((state: any) => state?.userInfoSlice?.userInfo);
     const userType = UserTypeHook();
     const toast = useToast();
-    const isDairy = userType === roles.DAIRY;
-    const isDevice = userType === roles.DEVICE;
-    const isAdmin = userType === roles.ADMIN;
+    const isDairy = userType === roles?.DAIRY;
+    const isDevice = userType === roles?.DEVICE;
+    const isAdmin = userType === roles?.ADMIN;
 
     const deviceid = userInfo?.deviceid;
     const dairyCode = userInfo?.dairyCode;
@@ -117,12 +117,12 @@ const AbsentMemberRecords: React.FC = () => {
 
             <View style={styles.recordHeader}>
                 <Text style={styles.recordTitle}>
-                    #{index + 1} | Code: {String(item.CODE).padStart(4, "0")}
+                    #{index + 1} | Code: {String(item?.CODE).padStart(4, "0")}
                 </Text>
             </View>
-            <Text style={styles.recordText}>Member: {item.MEMBERNAME}</Text>
+            <Text style={styles.recordText}>Member: {item?.MEMBERNAME}</Text>
             <Text style={styles.recordText}>
-                Milk Type: {item.MILKTYPE === "C" ? "Cow" : "Buffalo"}
+                Milk Type: {item?.MILKTYPE === "C" ? "Cow" : "Buffalo"}
             </Text>
         </View>
     );
@@ -132,23 +132,23 @@ const AbsentMemberRecords: React.FC = () => {
             <Text style={styles.totalTitle}>Overall Summary</Text>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Total Members:</Text>
-                <Text style={styles.totalValue}>{item.totalMembers}</Text>
+                <Text style={styles.totalValue}>{item?.totalMembers}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Present Count:</Text>
-                <Text style={styles.totalValue}>{item.presentCount}</Text>
+                <Text style={styles.totalValue}>{item?.presentCount}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Absent Count:</Text>
-                <Text style={styles.totalValue}>{item.absentCount}</Text>
+                <Text style={styles.totalValue}>{item?.absentCount}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Cow Absent:</Text>
-                <Text style={styles.totalValue}>{item.cowAbsentCount}</Text>
+                <Text style={styles.totalValue}>{item?.cowAbsentCount}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Buffalo Absent:</Text>
-                <Text style={styles.totalValue}>{item.bufAbsentCount}</Text>
+                <Text style={styles.totalValue}>{item?.bufAbsentCount}</Text>
             </View>
         </View>
     );

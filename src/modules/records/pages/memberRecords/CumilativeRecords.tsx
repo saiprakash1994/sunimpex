@@ -142,11 +142,11 @@ const CumilativeRecords: React.FC = () => {
         grandTotalAmount = 0,
         grandTotal = 0,
     } = data || {};
-    const cowMilkTypeTotals =
-        data?.milkTypeTotals.filter((cow: any) => cow?.MILKTYPE === "COW") || [];
-    const bufMilkTypeTotals =
-        data?.milkTypeTotals.filter((buf: any) => buf?.MILKTYPE === "BUF") || [];
+    const milkTypeTotals = Array.isArray(data?.milkTypeTotals) ? data?.milkTypeTotals : [];
 
+    const cowMilkTypeTotals = milkTypeTotals?.filter((cow: any) => cow?.MILKTYPE === "COW");
+    const bufMilkTypeTotals = milkTypeTotals?.filter((buf: any) => buf?.MILKTYPE === "BUF");
+    console.log(cowMilkTypeTotals, bufMilkTypeTotals, data, 'res')
     useEffect(() => {
         if (memberCodes.length > 0) {
             const firstMember = memberCodes[0];

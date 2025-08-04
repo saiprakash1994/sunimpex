@@ -30,12 +30,12 @@ import { Path } from "react-native-svg";
 const getToday = () => new Date().toISOString().split("T")[0];
 
 const DatewiseSummaryRecords: React.FC = () => {
-    const userInfo = useSelector((state: any) => state.userInfoSlice.userInfo);
+    const userInfo = useSelector((state: any) => state?.userInfoSlice?.userInfo);
     const userType = UserTypeHook();
     const toast = useToast();
-    const isDairy = userType === roles.DAIRY;
-    const isDevice = userType === roles.DEVICE;
-    const isAdmin = userType === roles.ADMIN;
+    const isDairy = userType === roles?.DAIRY;
+    const isDevice = userType === roles?.DEVICE;
+    const isAdmin = userType === roles?.ADMIN;
 
     const deviceid = userInfo?.deviceid;
     const dairyCode = userInfo?.dairyCode;
@@ -136,7 +136,7 @@ const DatewiseSummaryRecords: React.FC = () => {
     useEffect(() => {
         if (memberCodes.length > 0) {
             const firstMember = memberCodes[0];
-            const lastMember = memberCodes[memberCodes.length - 1];
+            const lastMember = memberCodes[memberCodes?.length - 1];
 
             setFilterStartMember(firstMember.CODE);
             setFilterEndMember(lastMember.CODE);
@@ -153,8 +153,8 @@ const DatewiseSummaryRecords: React.FC = () => {
             : allRecords?.filter((r) => r?.milkType === milkTypeFilter);
 
     const sortedRecords = [...filteredRecords].sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
+        const dateA = new Date(a?.date).getTime();
+        const dateB = new Date(b?.date).getTime();
         return dateA - dateB;
     });
 
@@ -162,20 +162,18 @@ const DatewiseSummaryRecords: React.FC = () => {
         <View style={styles.recordCard}>
             <View style={styles.recordHeader}>
                 <Text style={styles.recordTitle}>
-                    #{index + 1} | Date: {item.date} | Shift: {item.shift}
+                    #{index + 1} | Date: {item?.date} | Shift: {item?.shift}
                 </Text>
-                {item.photoUrl && (
-                    <Image source={{ uri: item.photoUrl }} style={styles.summaryPhoto} />
-                )}
+
             </View>
             <Text style={styles.recordText}>
-                Total Records: {item.totalRecords} | Total Qty: {item.totalQuantity} L
+                Total Records: {item?.totalRecords} | Total Qty: {item?.totalQuantity} L
             </Text>
             <Text style={styles.recordText}>
-                Total Amount: ₹{item.totalAmount} | Incentive: ₹{item.totalIncentive}
+                Total Amount: ₹{item?.totalAmount} | Incentive: ₹{item?.totalIncentive}
             </Text>
             <Text style={styles.grandTotalText}>
-                Grand Total: ₹{item.grandTotal}
+                Grand Total: ₹{item?.grandTotal}
             </Text>
         </View>
     );
@@ -374,7 +372,7 @@ const DatewiseSummaryRecords: React.FC = () => {
                         <FlatList
                             data={sortedRecords}
                             renderItem={renderRecordItem}
-                            keyExtractor={(item) => `${item.date}-${item.shift}`}
+                            keyExtractor={(_, index) => index.toString()}
                             contentContainerStyle={{ paddingBottom: 20 }}
                             scrollEnabled={false}
                         />
