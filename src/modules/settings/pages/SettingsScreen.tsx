@@ -302,8 +302,8 @@ const SettingsScreen: React.FC = () => {
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
-                        <View style={{ flexDirection: 'row' }}>
-                            <View style={{ flex: 1 }}>
+                        <View style={styles.switchCard}>
+                            <View style={{ flex: 1, }}>
                                 <SwitchControl
                                     label={`Weight Mode (${settings.weightMode === 'AUTO' ? 'AUTO' : 'MANUAL'})`}
                                     value={settings.weightMode === 'AUTO'}
@@ -312,6 +312,9 @@ const SettingsScreen: React.FC = () => {
                                     description="Toggle between AUTO and MANUAL weight mode"
                                 />
                             </View>
+                        </View>
+                        <View style={styles.switchCard}>
+
                             <View style={{ flex: 1 }}>
                                 <SwitchControl
                                     label={`Analyzer Mode (${settings.fatMode === 'AUTO' ? 'AUTO' : 'MANUAL'})`}
@@ -322,7 +325,8 @@ const SettingsScreen: React.FC = () => {
                                 />
                             </View>
                         </View>
-                        <View style={{ flexDirection: 'row' }}>
+                        <View style={styles.switchCard}>
+
                             <View style={{ flex: 1 }}>
                                 <SwitchControl
                                     label="CLR Based Table"
@@ -332,6 +336,9 @@ const SettingsScreen: React.FC = () => {
                                     description="Enable CLR based rate table for milk analysis"
                                 />
                             </View>
+                        </View>
+                        <View style={styles.switchCard}>
+
                             <View style={{ flex: 1 }}>
                                 <SwitchControl
                                     label="Mixed Milk"
@@ -342,7 +349,8 @@ const SettingsScreen: React.FC = () => {
                                 />
                             </View>
                         </View>
-                        <View style={{ flexDirection: 'row' }}>
+
+                        <View style={styles.switchCard}>
                             <View style={{ flex: 1 }}>
                                 <SwitchControl
                                     label={settings.clrBasedTable ? 'Use Cow CLR' : 'Use Cow SNF'}
@@ -352,6 +360,9 @@ const SettingsScreen: React.FC = () => {
                                     description={settings.clrBasedTable ? 'Enable CLR calculation for cow milk' : 'Enable SNF calculation for cow milk'}
                                 />
                             </View>
+                        </View>
+                        <View style={styles.switchCard}>
+
                             <View style={{ flex: 1 }}>
                                 <SwitchControl
                                     label={settings.clrBasedTable ? 'Use Buf CLR' : 'Use Buf SNF'}
@@ -362,7 +373,7 @@ const SettingsScreen: React.FC = () => {
                                 />
                             </View>
                         </View>
-                        <View style={{ flexDirection: 'row' }}>
+                        <View style={styles.switchCard}>
                             <View style={{ flex: 1 }}>
                                 <SwitchControl
                                     label="High FAT Accept"
@@ -372,6 +383,9 @@ const SettingsScreen: React.FC = () => {
                                     description="Accept milk with high fat content"
                                 />
                             </View>
+                        </View>
+                        <View style={styles.switchCard}>
+
                             <View style={{ flex: 1 }}>
                                 <SwitchControl
                                     label="Low FAT Accept"
@@ -593,13 +607,13 @@ const styles = StyleSheet.create({
     tabBar: { flexDirection: 'row' },
     tabButton: { minWidth: 90, alignItems: 'center', padding: 10, flexDirection: 'row', justifyContent: 'center', borderRadius: 8, marginRight: 8 },
     tabButtonActive: { backgroundColor: '#fff', borderBottomWidth: 2, borderBottomColor: THEME_COLORS.secondary },
-    tabButtonText: { marginLeft: 6, fontWeight: 'bold', color: '#888' },
+    tabButtonText: { marginLeft: 6, fontWeight: 'bold', color: TEXT_COLORS.secondary },
     tabContent: { marginTop: 12 },
     switchRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
     switchLabel: { fontWeight: 'bold', fontSize: 16, flexDirection: 'row', alignItems: 'center' },
     switchDesc: { color: '#666', fontSize: 12 },
     sectionTitle: { fontWeight: 'bold', fontSize: 16, marginVertical: 8 },
-    analyzerButton: { backgroundColor: '#e9ecef', borderRadius: 8, padding: 8, marginRight: 8 },
+    analyzerButton: { backgroundColor: TEXT_COLORS.secondary, borderRadius: 8, padding: 8, marginRight: 8 },
     analyzerButtonSelected: { backgroundColor: THEME_COLORS.secondary },
     analyzerButtonText: { color: TEXT_COLORS.whiteColor, fontWeight: 'bold' },
     inputLabel: { fontWeight: 'bold', marginTop: 8 },
@@ -617,6 +631,20 @@ const styles = StyleSheet.create({
     deviceButton: { backgroundColor: '#e9ecef', borderRadius: 8, padding: 10, marginRight: 8 },
     deviceButtonSelected: { backgroundColor: THEME_COLORS.secondary },
     deviceButtonText: { color: '#333', fontWeight: 'bold' },
+    switchCard: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        backgroundColor: "#fff",
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 16,
+        elevation: 3, // Android shadow
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+
 });
 
 export default SettingsScreen;

@@ -152,17 +152,30 @@ const DeviceRecords: React.FC = () => {
     const renderRecordItem = ({ item, index }: { item: RecordItem; index: number }) => (
         <View style={styles.recordCard}>
             <Text style={styles.recordHeader}>
-                #{index + 1} | Code: {String(item.CODE).padStart(4, "0")}
+                #{index + 1} | Code: {String(item.CODE).padStart(4, "0")} | {item?.SAMPLEDATE} | Shift: {item?.SHIFT}
             </Text>
-            <Text style={styles.recordText}>
-                {item?.SAMPLEDATE} | Shift: {item?.SHIFT} | Milk: {item?.MILKTYPE}
-            </Text>
-            <Text style={styles.recordText}>
-                FAT: {item?.FAT.toFixed(1)} | SNF: {item?.SNF.toFixed(1)} | QTY: {item?.QTY.toFixed(2)} L
-            </Text>
-            <Text style={styles.recordText}>
-                Rate: ₹{item?.RATE.toFixed(2)} | Total: ₹{item?.TOTAL.toFixed(2)}
-            </Text>
+
+            <View style={styles.recordColumns}>
+                {/* Left column */}
+                <View style={styles.recordColumn}>
+                    <Text style={styles.recordText}>Milk: {item?.MILKTYPE}</Text>
+                    <Text style={styles.recordText}>FAT: {item?.FAT.toFixed(1)}</Text>
+                    <Text style={styles.recordText}>SNF: {item?.SNF.toFixed(1)}</Text>
+                    <Text style={styles.recordText}>CLR: {item?.CLR.toFixed(1)}</Text>
+                    <Text style={styles.recordText}>QTY: {item?.QTY.toFixed(2)} L</Text>
+
+                </View>
+
+                {/* Right column */}
+                <View style={styles.recordColumn}>
+                    <Text style={styles.recordText}>Rate: ₹{item?.RATE.toFixed(2)}</Text>
+                    <Text style={styles.recordText}>Amount: ₹{item?.AMOUNT.toFixed(2)}</Text>
+                    <Text style={styles.recordText}>Incentive: ₹{item?.INCENTIVEAMOUNT.toFixed(1)}</Text>
+                    <Text style={styles.recordText}>Total: ₹{item?.TOTAL.toFixed(2)}</Text>
+
+                </View>
+            </View>
+
         </View>
     );
     const formatDateDMY = (d: string) => {
@@ -490,8 +503,20 @@ const styles = StyleSheet.create({
         color: TEXT_COLORS.whiteColor,
         textAlign: 'left',
     },
-    recordHeader: { fontWeight: "700", fontSize: 15, color: THEME_COLORS.secondary, marginBottom: 4 },
-    recordText: { fontSize: 14, color: "#444", marginBottom: 2 },
+    recordHeader: { fontWeight: "700", fontSize: 14, color: THEME_COLORS.secondary, marginBottom: 4 },
+    recordColumns: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 4,
+    },
+    recordColumn: {
+        flex: 1,
+    },
+    recordText: {
+        fontSize: 14,
+        color: "#444",
+        marginBottom: 4,
+    },
 });
 
 export default DeviceRecords;

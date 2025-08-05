@@ -338,6 +338,7 @@ const DashboardScreen = () => {
                                 backgroundGradientFrom: "#fff",
                                 backgroundGradientTo: "#fff",
                                 decimalPlaces: 2,
+
                                 color: (opacity) => `rgba(43, 80, 161, ${opacity})`,
                                 labelColor: () => TEXT_COLORS.primary,
                             }}
@@ -348,31 +349,36 @@ const DashboardScreen = () => {
                     {/* Pie Chart Card - Improved */}
                     <View style={styles.chartCardModern}>
                         <Text style={styles.sectionTitle}><Icon name="chart-pie" size={20} color={THEME_COLORS.secondary} /> Milk Distribution</Text>
-                        <PieChart
-                            data={pieData?.map((d) => ({
-                                name: d.name,
-                                population: d.quantity,
-                                color: d.color,
-                                legendFontColor: d.legendFontColor,
-                                legendFontSize: d.legendFontSize,
+                        <View style={styles.chartWrapper}>
 
-                            }))}
-                            width={screenWidth}
-                            height={220}
-                            chartConfig={{
-                                backgroundColor: "#fff",
-                                backgroundGradientFrom: "#fff",
-                                backgroundGradientTo: "#fff",
-                                color: () => "#000",
-                                labelColor: () => "#000",
-                            }}
-                            accessor={"population"}
-                            backgroundColor={"transparent"}
-                            paddingLeft={"15"}
-                            absolute
-                            style={styles.chart}
-                            hasLegend={false}
-                        />
+                            <PieChart
+                                data={pieData?.map((d) => ({
+                                    name: d.name,
+                                    population: d.quantity,
+                                    color: d.color,
+                                    legendFontColor: d.legendFontColor,
+                                    legendFontSize: d.legendFontSize,
+
+                                }))}
+
+                                width={screenWidth * 0.7}
+                                height={220}
+                                chartConfig={{
+                                    backgroundColor: "#fff",
+                                    backgroundGradientFrom: "#fff",
+                                    backgroundGradientTo: "#fff",
+
+                                    color: () => "#000",
+                                    labelColor: () => "#000",
+                                }}
+                                accessor={"population"}
+                                backgroundColor={"transparent"}
+                                paddingLeft="60"
+                                absolute
+                                style={styles.chart}
+                                hasLegend={false}
+                            />
+                        </View>
                         {/* Custom Legend below the chart */}
                         <View style={styles.pieLegendContainer}>
                             {pieData.map((d, idx) => (
@@ -527,6 +533,10 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
     },
     chart: { marginVertical: 8, borderRadius: 16 },
+    chartWrapper: {
+        alignItems: "center",
+        justifyContent: "center",
+    },
     errorCard: {
         backgroundColor: "#fee2e2",
         borderRadius: 12,

@@ -178,13 +178,13 @@ const DeviceScreen: React.FC = () => {
                         style={styles.editButton}
                         onPress={() => navigation.navigate("deviceadd", { deviceId: item.deviceid })}
                     >
-                        <Icon name="edit" size={16} color="#fff" />
+                        <Icon name="edit" size={15} color="#fff" />
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.deleteButton}
                         onPress={() => confirmDelete(item.deviceid)}
                     >
-                        <Icon name="trash" size={16} color="#b91c1c" />
+                        <Icon name="trash" size={15} color="#b91c1c" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -431,16 +431,16 @@ const styles = StyleSheet.create({
     editButton: {
         backgroundColor: THEME_COLORS.secondary,
         borderRadius: 20,
-        paddingVertical: 6,
-        paddingHorizontal: 16,
+        paddingVertical: 4,
+        paddingHorizontal: 10,
         flexDirection: "row",
         alignItems: "center",
     },
     deleteButton: {
         backgroundColor: "#fee2e2",
         borderRadius: 20,
-        paddingVertical: 6,
-        paddingHorizontal: 16,
+        paddingVertical: 4,
+        paddingHorizontal: 10,
         flexDirection: "row",
         alignItems: "center",
     },
