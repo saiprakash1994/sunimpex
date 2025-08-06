@@ -119,7 +119,6 @@ const CumilativeRecords: React.FC = () => {
                     limit: 10000,
                 },
             }).unwrap();
-            console.log(result, 'res')
             setAllRecords(result?.data || []);
             setTotals(result?.milkTypeTotals || []);
             setTotalCount(result?.data?.length || 0);
@@ -146,7 +145,6 @@ const CumilativeRecords: React.FC = () => {
 
     const cowMilkTypeTotals = milkTypeTotals?.filter((cow: any) => cow?.MILKTYPE === "COW");
     const bufMilkTypeTotals = milkTypeTotals?.filter((buf: any) => buf?.MILKTYPE === "BUF");
-    console.log(cowMilkTypeTotals, bufMilkTypeTotals, data, 'res')
     useEffect(() => {
         if (memberCodes.length > 0) {
             const firstMember = memberCodes[0];
@@ -317,7 +315,6 @@ const CumilativeRecords: React.FC = () => {
             }
 
             const finalPath = `file://${filePath}`;
-            console.log("Sharing file at:", finalPath);
 
             await Share.open({
                 url: finalPath,
@@ -325,7 +322,6 @@ const CumilativeRecords: React.FC = () => {
                 failOnCancel: false,
             });
         } catch (err: any) {
-            console.log("Share error", err);
             ShowToster(toast, "Unable to share file.", '', 'error');
         }
     };

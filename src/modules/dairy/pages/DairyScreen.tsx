@@ -30,7 +30,6 @@ const DairyPage = () => {
     const { data: dairies = [], isLoading, isError } = useGetAllDairysQuery("");
     const { data: allDevices = [] } = useGetAllDevicesQuery("");
     const [deleteDairy] = useDeleteDairyMutation();
-    console.log(dairies)
     const handleDelete = async (id: any) => {
         Alert.alert(
             "Delete Dairy",

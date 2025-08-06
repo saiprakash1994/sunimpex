@@ -84,7 +84,6 @@ const SettingsScreen: React.FC = () => {
     } = useGetDeviceByIdQuery(idToFetch, {
         skip: !idToFetch,
     });
-    console.log(allDevices, dairyDevices, deviceData)
 
     const [editDevice] = useEditDeviceMutation();
 

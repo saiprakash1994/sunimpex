@@ -25,7 +25,6 @@ const ProfileScreen = () => {
     const [logout] = useLogoutMutation();
 
     const [modalVisible, setModalVisible] = useState(false);
-    console.log(role, roles.DEVICE)
     let name = '';
     let email = '';
     let avatarIcon = 'user-circle';

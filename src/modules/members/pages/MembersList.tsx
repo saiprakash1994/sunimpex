@@ -93,22 +93,16 @@ const MemberList = () => {
         setFormLoading(true);
         try {
             const payload = { deviceid: deviceCode, ...memberForm, CODE: codeNum };
-            console.log(payload, 'payload')
             if (isEdit) {
-                console.log('ssssse')
 
                 let res = await editMember(payload).unwrap();
-                console.log(res, 'res')
                 ShowToster(toast, "Member updated successfully", "", "success");
             } else {
-                console.log('sssssa')
                 let res1 = await addMember(payload).unwrap();
-                console.log(res1, 'res1')
                 ShowToster(toast, "Member added successfully", "", "success");
             }
             setShowAddEditModal(false);
         } catch (err: any) {
-            console.log(err, 'err')
             ShowToster(toast, err?.data?.error || "Error saving member", "", "danger");
         } finally {
             setFormLoading(false);

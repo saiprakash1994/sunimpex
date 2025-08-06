@@ -232,7 +232,6 @@ const MemberRecords: React.FC = () => {
             }
 
             const finalPath = `file://${filePath}`;
-            console.log("Sharing file at:", finalPath);
 
             await Share.open({
                 url: finalPath,
@@ -240,7 +239,6 @@ const MemberRecords: React.FC = () => {
                 failOnCancel: false,
             });
         } catch (err: any) {
-            console.log("Share error", err);
             ShowToster(toast, "Unable to share file.", '', 'error');
         }
     };

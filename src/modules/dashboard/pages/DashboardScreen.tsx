@@ -62,7 +62,6 @@ const DashboardScreen = () => {
         const codes = allDevices.map((d: any) => d.dairyCode).filter(Boolean);
         return Array.from(new Set(codes));
     }, [isAdmin, allDevices]);
-    console.log(dairyCodes, allDevices.map((e: any) => e.dairyCode))
     // Devices for selected dairy (admin)
     const filteredDevices = useMemo(() => {
         if (!isAdmin) return [];

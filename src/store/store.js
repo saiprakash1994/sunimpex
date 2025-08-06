@@ -47,7 +47,6 @@ const store = configureStore({
         }).concat(authApi.middleware, DairyApi.middleware, DeviceApi.middleware, RecordApi.middleware, UploadApi.middleware),
 });
 
-console.log('Initial Store State:', store.getState());
 store.subscribe(() => {
     console.log("Redux store updated:", store.getState());
 });

@@ -91,7 +91,6 @@ export const recordDetails = RecordApi.injectEndpoints({
     endpoints: (builder) => ({
         getAllRecords: builder.query({
             query: (body) => {
-                console.log("getAllRecords params:", body);
                 const basePath = "reports/datewise-report";
                 const params = body?.params || {};
                 const queryString = new URLSearchParams(params).toString();
@@ -101,7 +100,6 @@ export const recordDetails = RecordApi.injectEndpoints({
         }),
         getMultipleRecords: builder.query({
             query: (body) => {
-                console.log("getMultipleRecords params:", body);
                 const basePath = "reports/datewise-report/multiple";
                 const params = body?.params || {};
                 const queryString = new URLSearchParams(params).toString();
@@ -111,7 +109,6 @@ export const recordDetails = RecordApi.injectEndpoints({
         }),
         getMemberCodewiseReport: builder.query({
             query: (body) => {
-                console.log("getMemberCodewiseReport params:", body);
                 const basePath = "reports/codewise-report";
                 const params = body?.params || {};
                 const queryString = new URLSearchParams(params).toString();
@@ -121,7 +118,6 @@ export const recordDetails = RecordApi.injectEndpoints({
         }),
         getAbsentMemberReport: builder.query({
             query: (body) => {
-                console.log("getAbsentMemberReport params:", body);
                 const basePath = "reports/absent-members-report";
                 const params = body?.params || {};
                 const queryString = new URLSearchParams(params).toString();
@@ -131,7 +127,6 @@ export const recordDetails = RecordApi.injectEndpoints({
         }),
         getCumulativeReport: builder.query({
             query: (body) => {
-                console.log("getCumulativeReport params:", body);
                 const basePath = "reports/cumulative-report";
                 const params = body?.params || {};
                 const queryString = new URLSearchParams(params).toString();
@@ -141,7 +136,6 @@ export const recordDetails = RecordApi.injectEndpoints({
         }),
         getDatewiseDetailedReport: builder.query({
             query: (body) => {
-                console.log("getDatewiseDetailedReport params:", body);
                 const basePath = "reports/datewise-detailed-report";
                 const params = body?.params || {};
                 const queryString = new URLSearchParams(params).toString();
@@ -151,7 +145,6 @@ export const recordDetails = RecordApi.injectEndpoints({
         }),
         getDatewiseSummaryReport: builder.query({
             query: (body) => {
-                console.log("getDatewiseSummaryReport params:", body);
                 const basePath = "reports/datewise-summary-report";
                 const params = body?.params || {};
                 const queryString = new URLSearchParams(params).toString();

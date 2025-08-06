@@ -118,13 +118,11 @@ const DatewiseSummaryRecords: React.FC = () => {
                     limit: 10000,
                 },
             }).unwrap();
-            console.log(result, 'res')
             setAllRecords(result?.data || []);
             setTotalCount(result?.data?.length || 0);
             setHasSearched(true);
             ShowToster(toast, "Data loaded successfully!", "", "success");
         } catch (err: any) {
-            console.error(err);
             ShowToster(toast, "Failed to fetch data", "", "error");
         }
     };
@@ -183,7 +181,6 @@ const DatewiseSummaryRecords: React.FC = () => {
             }
 
             const finalPath = `file://${filePath}`;
-            console.log("Sharing file at:", finalPath);
 
             await Share.open({
                 url: finalPath,
@@ -191,7 +188,6 @@ const DatewiseSummaryRecords: React.FC = () => {
                 failOnCancel: false,
             });
         } catch (err: any) {
-            console.log("Share error", err);
             ShowToster(toast, "Unable to share file.", '', 'error');
         }
     };
@@ -460,6 +456,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
+        borderLeftWidth: 4,
+        borderLeftColor: THEME_COLORS.secondary,
     },
     recordHeader: {
         fontSize: 15,

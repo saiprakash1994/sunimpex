@@ -5,7 +5,6 @@ export const deviceDetails = DeviceApi.injectEndpoints({
     endpoints: (builder) => ({
         getAllDevices: builder.query({
             query: () => {
-                console.log('[getAllDevices] API called');
                 return `device/getall`;
             },
             providesTags: ['device'],
@@ -14,7 +13,6 @@ export const deviceDetails = DeviceApi.injectEndpoints({
         }),
         getDeviceById: builder.query({
             query: (deviceid) => {
-                console.log('[getDeviceById] API called with deviceid:', deviceid);
                 return `device/deviceid/${deviceid}`;
             },
             providesTags: ['device'],
@@ -23,7 +21,6 @@ export const deviceDetails = DeviceApi.injectEndpoints({
         }),
         getDeviceByCode: builder.query({
             query: (dairyCode) => {
-                console.log('[getDeviceByCode] API called with dairyCode:', dairyCode);
                 return `device/devicecode/${dairyCode}`;
             },
             providesTags: ['device'],
@@ -32,7 +29,6 @@ export const deviceDetails = DeviceApi.injectEndpoints({
         }),
         createDevice: builder.mutation({
             query: (body) => {
-                console.log('[createDevice] API called with body:', body);
                 return {
                     url: 'device/add',
                     method: 'POST',
@@ -43,7 +39,6 @@ export const deviceDetails = DeviceApi.injectEndpoints({
         }),
         editDevice: builder.mutation({
             query: ({ id, ...body }) => {
-                console.log('[editDevice] API called with id:', id, 'body:', body);
                 return {
                     url: `device/edit/${id}`,
                     method: 'PUT',
@@ -54,7 +49,6 @@ export const deviceDetails = DeviceApi.injectEndpoints({
         }),
         deleteDevice: builder.mutation({
             query: (deviceid) => {
-                console.log('[deleteDevice] API called with deviceid:', deviceid);
                 return {
                     url: `device/delete/${deviceid}`,
                     method: 'DELETE'
@@ -64,7 +58,6 @@ export const deviceDetails = DeviceApi.injectEndpoints({
         }),
         addMember: builder.mutation({
             query: (body) => {
-                console.log(body, 'add')
                 return {
                     url: 'device/addMember',
                     method: 'POST',
@@ -75,7 +68,6 @@ export const deviceDetails = DeviceApi.injectEndpoints({
         }),
         editMember: builder.mutation({
             query: (body) => {
-                console.log(body, 'edit')
 
                 return {
                     url: 'device/editMember',
