@@ -5,16 +5,25 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import { THEME_COLORS, TEXT_COLORS } from '../../../globalStyle/GlobalStyles';
 import { roles } from '../../../shared/utils/appRoles';
 import { clearUserInfo } from '../../authentication/store/userInfoSlice';
-import { useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import AddDairy from '../../dairy/pages/AddDairy';
 import AddDevice from '../../device/pages/AddDevice';
 import { LogoutIcon } from '../../../icons/SvgIcons';
+import { AppConstants, clearLocalStorage, getItemFromLocalStorage } from '../../../shared/utils/localStorage';
+import { persistor } from '../../../store/store';
+import { useLogoutMutation } from '../../authentication/store/authenticateEndPoints';
+import { authApi } from '../../authentication/store/authenticateApi';
 
+type RootStackParamList = {
+    login: undefined;
+};
 const ProfileScreen = () => {
     const userInfo = useSelector((state: any) => state.userInfoSlice.userInfo);
     const role = userInfo?.role;
     const dispatch = useDispatch();
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [logout] = useLogoutMutation();
+
     const [modalVisible, setModalVisible] = useState(false);
     console.log(role, roles.DEVICE)
     let name = '';
@@ -39,9 +48,45 @@ const ProfileScreen = () => {
         roleLabel = 'User';
     }
 
-    const handleLogout = () => {
-        dispatch(clearUserInfo());
+    const handleLogout = async (): Promise<void> => {
+        try {
+            // Call backend logout if you want to invalidate the refresh token
+            await logout({ refreshToken: await getItemFromLocalStorage(AppConstants.refreshToken) }).unwrap();
+
+            // Clear Redux Persist (if you use it)
+            if (persistor) {
+                await persistor.purge();
+            }
+
+            // Clear local storage
+            await clearLocalStorage();
+
+            // Clear Redux state
+            dispatch(clearUserInfo());
+            dispatch(authApi.util.resetApiState());
+
+            // Navigate to login screen
+            // navigation.reset({
+            //     index: 0,
+            //     routes: [{ name: "login" }],
+            // });
+        } catch (err) {
+            console.error("Logout error:", err);
+
+            // Even if backend logout fails, still clear local data
+            if (persistor) {
+                await persistor.purge();
+            }
+            await clearLocalStorage();
+            dispatch(clearUserInfo());
+            dispatch(authApi.util.resetApiState());
+            // navigation.reset({
+            //     index: 0,
+            //     routes: [{ name: "login" }],
+            // });
+        }
     };
+
 
     const handleEditProfile = () => {
         setModalVisible(true);

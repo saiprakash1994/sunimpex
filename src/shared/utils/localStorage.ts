@@ -32,5 +32,7 @@ export const clearLocalStorage = async (): Promise<void> => {
 // Constants
 export const AppConstants = {
   accessToken: "accessToken",
+  refreshToken: "refreshToken",
   userInfo: "userInfo",
+
 };

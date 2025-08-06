@@ -180,30 +180,38 @@ const CumilativeRecords: React.FC = () => {
     // Record Item Renderer
     const renderRecordItem = ({ item, index }: { item: any; index: number }) => (
         <View style={styles.recordCard}>
-            <View style={styles.recordHeader}>
-                <Text style={styles.recordTitle}>
-                    #{index + 1} | Code: {String(item.CODE).padStart(4, "0")}
-                </Text>
+            <Text style={styles.recordHeader}>
+                #{index + 1} | Code: {String(item.CODE).padStart(4, "0")} | Milk Type: {item.MILKTYPE}
+            </Text>
+            <View style={styles.recordColumns}>
+                <View style={styles.recordColumn}>
+                    <Text style={styles.recordText}>
+                        Total Qty: {parseFloat(item.totalQty).toFixed(2)} L
+                    </Text>
+                    <Text style={styles.recordText}>Avg FAT: {parseFloat(item.avgFat).toFixed(1)} </Text>
+                    <Text style={styles.recordText}>Avg SNF: {parseFloat(item.avgSnf).toFixed(1)} </Text>
+                    <Text style={styles.recordText}>Avg CLR: {parseFloat(item.avgClr).toFixed(1)} </Text>
+                </View>
+                <View style={styles.recordColumn}>
+
+                    <Text style={styles.recordText}>
+                        Rate: ₹{parseFloat(item.avgRate).toFixed(2)}
+                    </Text>
+                    <Text style={styles.recordText}>
+                        Total Amount: ₹{parseFloat(item.totalAmount).toFixed(2)} </Text>
+                    <Text style={styles.recordText}>
+                        Incentive: ₹{parseFloat(item.totalIncentive).toFixed(2)}
+                    </Text>
+                    <Text style={styles.grandTotalText}>
+                        Total: ₹{parseFloat(item.grandTotal).toFixed(2)}
+                    </Text>
+                </View>
             </View>
-            <Text style={styles.recordText}>Milk Type: {item.MILKTYPE}</Text>
-            <Text style={styles.recordText}>
-                Total Qty: {parseFloat(item.totalQty).toFixed(2)} L
-            </Text>
-            <Text style={styles.recordText}>
-                Avg FAT: {parseFloat(item.avgFat).toFixed(1)} |
-                Avg SNF: {parseFloat(item.avgSnf).toFixed(1)} |
-                Avg CLR: {parseFloat(item.avgClr).toFixed(1)}
-            </Text>
-            <Text style={styles.recordText}>
-                Rate: ₹{parseFloat(item.avgRate).toFixed(2)}
-            </Text>
-            <Text style={styles.recordText}>
-                Total Amount: ₹{parseFloat(item.totalAmount).toFixed(2)} |
-                Incentive: ₹{parseFloat(item.totalIncentive).toFixed(2)}
-            </Text>
-            <Text style={styles.grandTotalText}>
-                Grand Total: ₹{parseFloat(item.grandTotal).toFixed(2)}
-            </Text>
+
+
+
+
+
         </View>
     );
 
@@ -675,6 +683,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         elevation: 3,
     },
+
+
     recordCard: {
         backgroundColor: "#f8faff",
         padding: 14,
@@ -682,25 +692,17 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         elevation: 2,
         borderLeftWidth: 4,
-        borderLeftColor: "#3F51B5",
+        borderLeftColor: THEME_COLORS.secondary,
     },
-    recordHeader: {
+    recordHeader: { fontWeight: "700", fontSize: 14, color: THEME_COLORS.secondary, marginBottom: 4 },
+
+    recordColumns: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 8,
+        marginTop: 4,
     },
-    recordTitle: {
-        fontWeight: "700",
-        fontSize: 15,
-        color: "#3F51B5"
-    },
-    memberPhoto: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 2,
-        borderColor: "#3F51B5",
+    recordColumn: {
+        flex: 1,
     },
     recordText: {
         fontSize: 14,
@@ -710,7 +712,7 @@ const styles = StyleSheet.create({
     grandTotalText: {
         fontSize: 16,
         fontWeight: "700",
-        color: "#3F51B5",
+        color: THEME_COLORS.secondary,
         marginTop: 4,
     },
     breakdownContainer: {

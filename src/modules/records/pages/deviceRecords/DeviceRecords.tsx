@@ -171,19 +171,14 @@ const DeviceRecords: React.FC = () => {
                     <Text style={styles.recordText}>Rate: ₹{item?.RATE.toFixed(2)}</Text>
                     <Text style={styles.recordText}>Amount: ₹{item?.AMOUNT.toFixed(2)}</Text>
                     <Text style={styles.recordText}>Incentive: ₹{item?.INCENTIVEAMOUNT.toFixed(1)}</Text>
-                    <Text style={styles.recordText}>Total: ₹{item?.TOTAL.toFixed(2)}</Text>
+                    <Text style={styles.grandTotalText}>Total: ₹{item?.TOTAL.toFixed(2)}</Text>
 
                 </View>
             </View>
 
         </View>
     );
-    const formatDateDMY = (d: string) => {
-        const dt = new Date(d);
-        return `${dt.getDate().toString().padStart(2, "0")}/${(dt.getMonth() + 1)
-            .toString()
-            .padStart(2, "0")}/${dt.getFullYear()}`;
-    };
+
     const saveAndShareFile = async (filePath: string, mime: string) => {
         try {
             const exists = await RNFS.exists(filePath);
@@ -237,7 +232,7 @@ const DeviceRecords: React.FC = () => {
                 "S.No": i + 1,
                 "Member Code": String(rec?.CODE).padStart(4, "0"),
                 "Milk Type": rec?.MILKTYPE,
-                Date: formatDateDMY(rec?.SAMPLEDATE),
+                Date: rec?.SAMPLEDATE,
                 Shift: rec?.SHIFT,
                 FAT: rec?.FAT?.toFixed(1),
                 SNF: rec?.SNF?.toFixed(1),
@@ -249,9 +244,7 @@ const DeviceRecords: React.FC = () => {
                 Total: rec?.TOTAL?.toFixed(2),
                 Device: rec?.DEVICEID,
             }));
-            combinedCSV += `Device Code: ${deviceCode}\nDate: ${formatDateDMY(
-                date
-            )}\n`;
+            combinedCSV += `Device Code: ${deviceCode}\nDate: ${date}\n`;
             combinedCSV += Papa.unparse(recordsData);
             combinedCSV += "\n\n";
         }
@@ -271,14 +264,12 @@ const DeviceRecords: React.FC = () => {
                     (t?.totalAmount || 0) + (t?.totalIncentive || 0)
                 ).toFixed(2),
             }));
-            combinedCSV += `Milk Totals for ${deviceCode}\nDate: ${formatDateDMY(
-                date
-            )}\n`;
+            combinedCSV += `Milk Totals for ${deviceCode}\nDate: ${date}\n`;
             combinedCSV += Papa.unparse(totalsData);
         }
 
         // ✅ Save into public Downloads
-        const path = `${RNFS.DownloadDirectoryPath}/Daywise_Report_${deviceCode}_${formatDateDMY(date).replace(/\//g, "-")}.csv`;
+        const path = `${RNFS.DownloadDirectoryPath}/Daywise_Report_${deviceCode}_${date}.csv`;
 
 
         await RNFS.writeFile(path, combinedCSV, "utf8");
@@ -309,7 +300,7 @@ const DeviceRecords: React.FC = () => {
 
         doc.setFontSize(11).setFont("helvetica", "normal");
         doc.text(
-            `Date: ${formatDateDMY(date)} | Shift: ${shift || "ALL"
+            `Date: ${date} | Shift: ${shift || "ALL"
             } | Milk Type: ${milkTypeFilter || "ALL"}`,
             14,
             currentY
@@ -324,7 +315,7 @@ const DeviceRecords: React.FC = () => {
                 i + 1,
                 String(rec?.CODE).padStart(4, "0"),
                 rec?.MILKTYPE,
-                formatDateDMY(rec?.SAMPLEDATE),
+                rec?.SAMPLEDATE,
                 rec?.SHIFT,
                 rec?.FAT?.toFixed(1),
                 rec?.SNF?.toFixed(1),
@@ -381,7 +372,7 @@ const DeviceRecords: React.FC = () => {
         const pdfBase64 = doc.output("datauristring").split(",")[1];
 
         // ✅ Save into public Downloads
-        const path = `${RNFS.DownloadDirectoryPath}/Daywise_Report_${deviceCode}_${formatDateDMY(date).replace(/\//g, "-")}.pdf`;
+        const path = `${RNFS.DownloadDirectoryPath}/Daywise_Report_${deviceCode}_${date}.pdf`;
 
 
         await RNFetchBlob.fs.writeFile(path, pdfBase64, "base64");
@@ -516,6 +507,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#444",
         marginBottom: 4,
+    },
+    grandTotalText: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: THEME_COLORS.secondary,
+        marginTop: 4,
     },
 });
 

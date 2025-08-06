@@ -43,23 +43,27 @@ const DailyRecordCard: React.FC<{ dailyRecord: any; index: number }> = ({ dailyR
             data={dailyRecord.records}
             renderItem={({ item, index: recordIndex }) => (
                 <View style={styles.recordCard}>
-                    <View style={styles.recordHeader}>
-                        <Text style={styles.recordTitle}>
-                            Record #{recordIndex + 1} | Code: {String(item.CODE).padStart(4, "0")}
-                        </Text>
-                        {item.photoUrl && (
-                            <Image source={{ uri: item.photoUrl }} style={styles.memberPhoto} />
-                        )}
+                    <Text style={styles.recordHeader}>
+                        Record #{recordIndex + 1} | Code: {String(item.CODE).padStart(4, "0")} | Milk: {item?.MILKTYPE}
+                    </Text>
+
+                    <View style={styles.recordColumns}>
+                        <View style={styles.recordColumn}>
+                            <Text style={styles.recordText}>FAT: {item?.FAT.toFixed(1)}</Text>
+                            <Text style={styles.recordText}>SNF: {item?.SNF.toFixed(1)}</Text>
+                            <Text style={styles.recordText}>CLR: {item?.CLR.toFixed(1)}</Text>
+                            <Text style={styles.recordText}>QTY: {item?.QTY.toFixed(2)} L</Text>
+                        </View>
+                        <View style={styles.recordColumn}>
+                            <Text style={styles.recordText}>Rate: ₹{item?.RATE.toFixed(2)}</Text>
+                            {/* <Text style={styles.recordText}>Amount: ₹{item?.AMOUNT.toFixed(2)}</Text> */}
+                            <Text style={styles.recordText}>Incentive: ₹{item?.INCENTIVEAMOUNT.toFixed(1)}</Text>
+                            <Text style={styles.grandTotalText}>Total: ₹{item?.TOTALAMOUNT.toFixed(2)}</Text>
+
+                        </View>
                     </View>
-                    <Text style={styles.recordText}>
-                        Member: {item.MEMBERNAME} | Milk: {item.MILKTYPE}
-                    </Text>
-                    <Text style={styles.recordText}>
-                        FAT: {item.FAT} | SNF: {item.SNF} | QTY: {item.QTY} L
-                    </Text>
-                    <Text style={styles.recordText}>
-                        Rate: ₹{item.RATE} | Total: ₹{item.TOTAL}
-                    </Text>
+
+
                 </View>
             )}
             keyExtractor={(_, index) => index.toString()}
@@ -404,7 +408,7 @@ const DatewiseDetailedRecords: React.FC = () => {
 
     };
 
-
+    console.log(sortedRecords)
     return (
         <ScrollView style={styles.container}>
             <MemberRecordsFilterSection
@@ -544,36 +548,39 @@ const styles = StyleSheet.create({
         textAlign: 'left',
     },
     recordCard: {
-        backgroundColor: "#fff",
-        padding: 10,
-        marginVertical: 4,
-        borderRadius: 8,
-        borderLeftWidth: 3,
-        borderLeftColor: THEME_COLORS.primary,
+        backgroundColor: "#f8faff",
+        padding: 14,
+        marginVertical: 8,
+        borderRadius: 10,
+        elevation: 2,
+        borderLeftWidth: 4,
+        borderLeftColor: THEME_COLORS.secondary,
     },
-    recordHeader: {
+    recordHeader: { fontWeight: "700", fontSize: 14, color: THEME_COLORS.secondary, marginBottom: 4 },
+
+    recordColumns: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 6,
+        marginTop: 4,
     },
-    recordTitle: {
-        fontWeight: "600",
-        fontSize: 13,
-        color: THEME_COLORS.secondary
-    },
-    memberPhoto: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        borderWidth: 1,
-        borderColor: THEME_COLORS.primary,
+    recordColumn: {
+        flex: 1,
     },
     recordText: {
-        fontSize: 12,
+        fontSize: 14,
         color: "#444",
         marginBottom: 2
     },
+    grandTotalText: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: THEME_COLORS.secondary,
+        marginTop: 4,
+    },
+
+
+
+
     totalCard: {
         backgroundColor: "#f8faff",
         marginBottom: 12,

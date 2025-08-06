@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     View,
     Text,
@@ -147,36 +147,33 @@ const DatewiseSummaryRecords: React.FC = () => {
     }, [deviceCode, memberCodes]);
 
 
-    const filteredRecords =
-        milkTypeFilter === "ALL"
-            ? allRecords
-            : allRecords?.filter((r) => r?.milkType === milkTypeFilter);
+    const filteredRecords = useMemo(() => {
+        return allRecords.map((day) => {
+            const stats =
+                milkTypeFilter === "ALL"
+                    ? day.milktypeStats
+                    : day.milktypeStats.filter((m: any) => m.milktype === milkTypeFilter);
 
-    const sortedRecords = [...filteredRecords].sort((a, b) => {
-        const dateA = new Date(a?.date).getTime();
-        const dateB = new Date(b?.date).getTime();
-        return dateA - dateB;
-    });
+            const totals = stats.find((m: any) => m.milktype === milkTypeFilter) ||
+                day.milktypeStats.find((m: any) => m.milktype === "ALL");
 
-    const renderRecordItem = ({ item, index }: { item: any; index: number }) => (
-        <View style={styles.recordCard}>
-            <View style={styles.recordHeader}>
-                <Text style={styles.recordTitle}>
-                    #{index + 1} | Date: {item?.date} | Shift: {item?.shift}
-                </Text>
+            return {
+                ...day,
+                filteredStats: stats,
+                totalRecords: totals?.totalSamples || 0,
+                totalQuantity: totals?.totalQty || 0,
+                totalAmount: totals?.totalAmount || 0,
+                totalIncentive: totals?.totalIncentive || 0,
+                grandTotal: totals?.grandTotal || 0,
+            };
+        }).sort(
+            (a, b) =>
+                new Date(a.parsedDate).getTime() -
+                new Date(b.parsedDate).getTime()
+        );
+    }, [allRecords, milkTypeFilter]);
 
-            </View>
-            <Text style={styles.recordText}>
-                Total Records: {item?.totalRecords} | Total Qty: {item?.totalQuantity} L
-            </Text>
-            <Text style={styles.recordText}>
-                Total Amount: ₹{item?.totalAmount} | Incentive: ₹{item?.totalIncentive}
-            </Text>
-            <Text style={styles.grandTotalText}>
-                Grand Total: ₹{item?.grandTotal}
-            </Text>
-        </View>
-    );
+
     const saveAndShareFile = async (filePath: string, mime: string) => {
         try {
             const exists = await RNFS.exists(filePath);
@@ -370,11 +367,38 @@ const DatewiseSummaryRecords: React.FC = () => {
                     </View>
                     {(
                         <FlatList
-                            data={sortedRecords}
-                            renderItem={renderRecordItem}
+                            data={filteredRecords}
+                            renderItem={({ item, index }) => (
+                                <View style={styles.recordCard}>
+                                    <Text style={styles.recordHeader}>
+                                        #{index + 1} | Date: {item.date} | Shift: {item.shift}
+                                    </Text>
+                                    <Text style={styles.recordText}>
+                                        Total Records: {item.totalRecords} | Total Qty: {item.totalQuantity.toFixed(2)} L
+                                    </Text>
+                                    <Text style={styles.recordText}>
+                                        Total Amount: ₹{item.totalAmount.toFixed(2)} | Incentive: ₹{item.totalIncentive.toFixed(2)}
+                                    </Text>
+                                    <Text style={styles.grandTotalText}>
+                                        Grand Total: ₹{item.grandTotal.toFixed(2)}
+                                    </Text>
+
+                                    {milkTypeFilter === "ALL" &&
+                                        item.filteredStats
+                                            .filter((m: any) => m.milktype !== "ALL")
+                                            .map((m: any, idx: number) => (
+                                                <View key={idx} style={styles.milkTypeRow}>
+                                                    <Text style={styles.milkTypeTitle}>
+                                                        {m.milktype === "COW" ? "🐄 Cow Milk" : "🐃 Buffalo Milk"}
+                                                    </Text>
+                                                    <Text style={styles.milkTypeText}>
+                                                        Qty: {m.totalQty.toFixed(2)} L | Rate: ₹{m.avgRate.toFixed(2)} | Amount: ₹{m.totalAmount.toFixed(2)}
+                                                    </Text>
+                                                </View>
+                                            ))}
+                                </View>
+                            )}
                             keyExtractor={(_, index) => index.toString()}
-                            contentContainerStyle={{ paddingBottom: 20 }}
-                            scrollEnabled={false}
                         />
                     )}
 
@@ -404,15 +428,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         elevation: 3,
     },
-    recordCard: {
-        backgroundColor: "#f8faff",
-        padding: 14,
-        marginVertical: 8,
-        borderRadius: 10,
-        elevation: 2,
-        borderLeftWidth: 4,
-        borderLeftColor: THEME_COLORS.secondary,
-    },
+
     headingCard: {
         backgroundColor: THEME_COLORS.secondary,
         marginBottom: 12,
@@ -432,34 +448,54 @@ const styles = StyleSheet.create({
         color: TEXT_COLORS.whiteColor,
         textAlign: 'left',
     },
+
+    recordCard: {
+        backgroundColor: "#fff",
+        marginVertical: 8,
+        marginHorizontal: 12,
+        padding: 14,
+        borderRadius: 12,
+        elevation: 3,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
     recordHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 8,
-    },
-    recordTitle: {
-        fontWeight: "700",
         fontSize: 15,
-        color: THEME_COLORS.secondary
-    },
-    summaryPhoto: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 2,
-        borderColor: THEME_COLORS.secondary
+        fontWeight: "600",
+        color: THEME_COLORS.secondary,
+        marginBottom: 6,
     },
     recordText: {
-        fontSize: 14,
-        color: "#444",
-        marginBottom: 2
+        fontSize: 13,
+        color: "#374151",
+        marginBottom: 4,
     },
     grandTotalText: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: "700",
-        color: THEME_COLORS.secondary,
-        marginTop: 4,
+        color: "#059669",
+        marginTop: 6,
+    },
+    milkTypeRow: {
+        marginTop: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        backgroundColor: "#f9fafb",
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
+    },
+    milkTypeTitle: {
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#1e3a8a",
+        marginBottom: 2,
+    },
+    milkTypeText: {
+        fontSize: 12,
+        color: "#374151",
     },
     totalCard: {
         backgroundColor: "#f8faff",

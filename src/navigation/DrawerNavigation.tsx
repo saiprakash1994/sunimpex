@@ -16,7 +16,7 @@ import SettingsScreen from "../modules/settings/pages/SettingsScreen";
 import UploadScreen from "../modules/uploads/pages/UploadScreen";
 import ProfileScreen from "../modules/profile/pages/ProfileScreen";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { clearLocalStorage } from "../shared/utils/localStorage";
+import { AppConstants, clearLocalStorage, getItemFromLocalStorage } from "../shared/utils/localStorage";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUserInfo } from "../modules/authentication/store/userInfoSlice";
 import { persistor } from "../store/store"; // Import the persistor
@@ -26,6 +26,8 @@ import DairyScreen from "../modules/dairy/pages/DairyScreen";
 import RateTable from "../modules/rateTable/pages/RateTable";
 import MembersList from "../modules/members/pages/MembersList";
 import RecordsPage from "../modules/records/pages/recordsPage/RecordsPage";
+import { authApi } from "../modules/authentication/store/authenticateApi";
+import { useLogoutMutation } from "../modules/authentication/store/authenticateEndPoints";
 
 
 type RootStackParamList = {
@@ -116,6 +118,7 @@ function CustomDrawerContent(props: any) {
     const userInfo = useSelector((state: any) => state?.userInfoSlice?.userInfo)
 
     const displayLabel = userInfo?.dairyName || userInfo?.deviceName || (userInfo && Object.keys(userInfo).length === 0 ? "" : "User");
+    const [logout] = useLogoutMutation();
 
     const profileLetter = displayLabel.charAt(0).toUpperCase();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -123,11 +126,45 @@ function CustomDrawerContent(props: any) {
     const userType = useSelector((state: any) => state.userInfoSlice.userInfo.role);
     const sidebarOptions = userType === roles.ADMIN ? AdminOptions : userType === roles.DAIRY ? DairyOptions : DeviceOptions;
 
-    const handleLogout = async () => {
-        await persistor.purge(); // Purge the persisted state
-        clearLocalStorage();
-        dispatch(clearUserInfo());
+    const handleLogout = async (): Promise<void> => {
+        try {
+            // Call backend logout if you want to invalidate the refresh token
+            await logout({ refreshToken: await getItemFromLocalStorage(AppConstants.refreshToken) }).unwrap();
+
+            // Clear Redux Persist (if you use it)
+            if (persistor) {
+                await persistor.purge();
+            }
+
+            // Clear local storage
+            await clearLocalStorage();
+
+            // Clear Redux state
+            dispatch(clearUserInfo());
+            dispatch(authApi.util.resetApiState()); // ✅ clear RTK Query cache
+
+            // Navigate to login screen
+            // navigation.reset({
+            //     index: 0,
+            //     routes: [{ name: "login" }],
+            // });
+        } catch (err) {
+            console.error("Logout error:", err);
+
+            // Even if backend logout fails, still clear local data
+            if (persistor) {
+                await persistor.purge();
+            }
+            await clearLocalStorage();
+            dispatch(clearUserInfo());
+            dispatch(authApi.util.resetApiState());
+            // navigation.reset({
+            //     index: 0,
+            //     routes: [{ name: "login" }],
+            // });
+        }
     };
+
 
     return (
         <View style={{ flex: 1 }}>

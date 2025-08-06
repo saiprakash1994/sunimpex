@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
     View,
     Text,
@@ -52,6 +52,7 @@ const MemberList = () => {
     const [isEdit, setIsEdit] = useState(false);
     const [memberForm, setMemberForm] = useState(initialMemberState);
     const [formLoading, setFormLoading] = useState(false);
+    const [search, setSearch] = useState("");
 
     const [addMember] = useAddMemberMutation();
     const [editMember] = useEditMemberMutation();
@@ -136,6 +137,18 @@ const MemberList = () => {
             ]
         );
     };
+
+    const filteredMembers = useMemo(() => {
+        if (!search.trim()) return members;
+
+        const query = search.toLowerCase();
+        return members.filter((m: any) =>
+            m.CODE?.toString().toLowerCase().includes(query) ||
+            m.CONTACTNO?.toLowerCase().includes(query) ||
+            (m.MILKTYPE === "C" ? "cow" : "buffalo").toLowerCase().includes(query) ||
+            `member ${m.CODE.toString().padStart(4, "0")}`.toLowerCase().includes(query)
+        );
+    }, [search, members]);
     const renderMember = ({ item }: { item: any }) => (
         <View style={styles.memberCard}>
             <View style={styles.memberTopRow}>
@@ -229,6 +242,17 @@ const MemberList = () => {
 
 
                     )}
+                    <View style={styles.searchBar}>
+                        <Icon name="search" size={16} color={TEXT_COLORS.secondary} />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholderTextColor={TEXT_COLORS.primary}
+
+                            placeholder="Search by member code, contact, or milk type..."
+                            value={search}
+                            onChangeText={setSearch}
+                        />
+                    </View>
 
                     {(isDairyLoading || isDeviceLoading) ? (
                         <ActivityIndicator size="large" color="#007bff" />
@@ -237,7 +261,7 @@ const MemberList = () => {
                     ) : (
                         <>
                             <FlatList
-                                data={members}
+                                data={filteredMembers}
                                 keyExtractor={(item) => item.CODE.toString()}
                                 renderItem={renderMember}
                                 contentContainerStyle={styles.listContainer}
@@ -492,6 +516,22 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2
+    },
+    searchBar: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#fff",
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        marginBottom: 16,
+        borderColor: "#ccc",
+        borderWidth: 1,
+    },
+    searchInput: {
+        flex: 1,
+        marginLeft: 8,
+        fontSize: 14,
+        color: TEXT_COLORS.primary
     },
     memberTopRow: {
         flexDirection: "row",

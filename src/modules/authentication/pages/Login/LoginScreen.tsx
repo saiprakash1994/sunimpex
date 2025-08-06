@@ -101,36 +101,37 @@ const LoginScreen: React.FC = () => {
             const response: any = await login({
                 email: loginInfo.email.trim(),
                 password: loginInfo.password.trim(),
-            });
-
+            }).unwrap(); // unwrap will throw if there's an error
             if (response?.error) {
-                ShowToster(toast, "Login Failed ,Invalid credentials. Please try again.", '', "error");
+                ShowToster(toast, "Invalid credentials. Please try again.", "", 'error');
                 return;
             }
+            const { message, accessToken, refreshToken, role, dairyName, dairyCode, deviceName, deviceid } = response;
 
-            const { message, token, role, dairyName, dairyCode, deviceName, deviceid } = response.data;
-            ShowToster(toast, message, '', 'success')
+            ShowToster(toast, message, '', 'success');
 
             const userInfo = {
-                token,
                 role,
                 ...(role === roles.ADMIN || role === roles.DAIRY
                     ? { dairyName, dairyCode }
                     : { deviceName, deviceid, dairyCode }),
             };
 
-            dispatch(adduserInfo(userInfo));
-            setItemToLocalStorage(AppConstants.accessToken, token);
-            setItemToLocalStorage(AppConstants.userInfo, userInfo);
+            // Save tokens & user info
+            await setItemToLocalStorage(AppConstants.accessToken, accessToken);
+            await setItemToLocalStorage(AppConstants.refreshToken, refreshToken);
+            await setItemToLocalStorage(AppConstants.userInfo, JSON.stringify(userInfo));
 
+            dispatch(adduserInfo(userInfo));
 
             setLoginInfo({ email: "", password: "" });
 
-        } catch (err) {
+        } catch (err: any) {
             console.error("Login error:", err);
-            Alert.alert("Error", "An unexpected error occurred");
+            ShowToster(toast, "Login Failed. Invalid credentials.", '', "error");
         }
     };
+
 
     return (
         <ImageBackground source={backgroundImg}
