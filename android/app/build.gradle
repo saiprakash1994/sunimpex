@@ -119,3 +119,21 @@ dependencies {
 }
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+afterEvaluate {
+    tasks.matching { it.name == "generateDebugLintReportModel" }.configureEach {
+        dependsOn("copyReactNativeVectorIconFonts")
+    }
+
+    tasks.matching { it.name == "generateReleaseLintReportModel" }.configureEach {
+        dependsOn("copyReactNativeVectorIconFonts")
+    }
+
+    tasks.matching { it.name == "lintAnalyzeDebug" }.configureEach {
+        dependsOn("copyReactNativeVectorIconFonts")
+    }
+
+    tasks.matching { it.name == "lintAnalyzeRelease" }.configureEach {
+        dependsOn("copyReactNativeVectorIconFonts")
+    }
+}

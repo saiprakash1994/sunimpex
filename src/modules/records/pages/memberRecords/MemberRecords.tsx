@@ -218,7 +218,7 @@ const MemberRecords: React.FC = () => {
             <View style={[styles.totalRow, styles.grandTotalRow]}>
                 <Text style={styles.grandTotalLabel}>Grand Total:</Text>
                 <Text style={styles.grandTotalValue}>
-                    ₹{(item?.totalAmount + item?.totalIncentive)}
+                    ₹{(parseFloat(item?.totalAmount) + parseFloat(item?.totalIncentive)).toFixed(2)}
                 </Text>
             </View>
         </View>

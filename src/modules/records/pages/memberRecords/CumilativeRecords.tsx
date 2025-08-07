@@ -179,29 +179,29 @@ const CumilativeRecords: React.FC = () => {
     const renderRecordItem = ({ item, index }: { item: any; index: number }) => (
         <View style={styles.recordCard}>
             <Text style={styles.recordHeader}>
-                #{index + 1} | Code: {String(item.CODE).padStart(4, "0")} | Milk Type: {item.MILKTYPE}
+                #{index + 1} | Code: {String(item?.CODE).padStart(4, "0")} | Milk Type: {item?.MILKTYPE}
             </Text>
             <View style={styles.recordColumns}>
                 <View style={styles.recordColumn}>
                     <Text style={styles.recordText}>
-                        Total Qty: {parseFloat(item.totalQty).toFixed(2)} L
+                        Total Qty: {item?.totalQty} L
                     </Text>
-                    <Text style={styles.recordText}>Avg FAT: {parseFloat(item.avgFat).toFixed(1)} </Text>
-                    <Text style={styles.recordText}>Avg SNF: {parseFloat(item.avgSnf).toFixed(1)} </Text>
-                    <Text style={styles.recordText}>Avg CLR: {parseFloat(item.avgClr).toFixed(1)} </Text>
+                    <Text style={styles.recordText}>Avg FAT: {item?.avgFat} </Text>
+                    <Text style={styles.recordText}>Avg SNF: {item?.avgSnf} </Text>
+                    <Text style={styles.recordText}>Avg CLR: {item?.avgClr} </Text>
                 </View>
                 <View style={styles.recordColumn}>
 
                     <Text style={styles.recordText}>
-                        Rate: ₹{parseFloat(item.avgRate).toFixed(2)}
+                        Rate: ₹{item?.avgRate}
                     </Text>
                     <Text style={styles.recordText}>
-                        Total Amount: ₹{parseFloat(item.totalAmount).toFixed(2)} </Text>
+                        Amount: ₹{item?.totalAmount} </Text>
                     <Text style={styles.recordText}>
-                        Incentive: ₹{parseFloat(item.totalIncentive).toFixed(2)}
+                        Incentive: ₹{item?.totalIncentive}
                     </Text>
                     <Text style={styles.grandTotalText}>
-                        Total: ₹{parseFloat(item.grandTotal).toFixed(2)}
+                        Total: ₹{item?.grandTotal}
                     </Text>
                 </View>
             </View>
@@ -216,45 +216,45 @@ const CumilativeRecords: React.FC = () => {
     // Milk Type Totals Renderer
     const renderTotalItem = ({ item }: { item: any }) => (
         <View style={styles.totalCard}>
-            <Text style={styles.totalTitle}>{item.MILKTYPE} Milk</Text>
+            <Text style={styles.totalTitle}>{item?.MILKTYPE} Milk</Text>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Members:</Text>
-                <Text style={styles.totalValue}>{item.memberCount}</Text>
+                <Text style={styles.totalValue}>{item?.memberCount}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Qty (L):</Text>
-                <Text style={styles.totalValue}>{parseFloat(item.totalQty).toFixed(2)}</Text>
+                <Text style={styles.totalValue}>{item?.totalQty}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Avg Fat:</Text>
-                <Text style={styles.totalValue}>{parseFloat(item.avgFat).toFixed(1)}</Text>
+                <Text style={styles.totalValue}>{item?.avgFat}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Avg SNF:</Text>
-                <Text style={styles.totalValue}>{parseFloat(item.avgSnf).toFixed(1)}</Text>
+                <Text style={styles.totalValue}>{item?.avgSnf}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Avg CLR:</Text>
-                <Text style={styles.totalValue}>{parseFloat(item.avgClr).toFixed(1)}</Text>
+                <Text style={styles.totalValue}>{item?.avgClr}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Rate:</Text>
-                <Text style={styles.totalValue}>₹{parseFloat(item.avgRate).toFixed(2)}</Text>
+                <Text style={styles.totalValue}>₹{item?.avgRate}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Amount:</Text>
-                <Text style={styles.totalValue}>₹{parseFloat(item.totalAmount).toFixed(2)}</Text>
+                <Text style={styles.totalValue}>₹{item?.totalAmount}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Incentive:</Text>
                 <Text style={[styles.totalValue, { color: "green" }]}>
-                    ₹{parseFloat(item.totalIncentive).toFixed(2)}
+                    ₹{item?.totalIncentive}
                 </Text>
             </View>
             <View style={[styles.totalRow, styles.grandTotalRow]}>
                 <Text style={styles.grandTotalLabel}>Grand Total:</Text>
                 <Text style={styles.grandTotalValue}>
-                    ₹{parseFloat(item.grandTotal).toFixed(2)}
+                    ₹{item?.grandTotal}
                 </Text>
             </View>
         </View>
@@ -270,38 +270,38 @@ const CumilativeRecords: React.FC = () => {
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Qty (L):</Text>
-                <Text style={styles.totalValue}>{parseFloat(grandTotalQty).toFixed(2)}</Text>
+                <Text style={styles.totalValue}>{grandTotalQty}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Avg Fat:</Text>
-                <Text style={styles.totalValue}>{parseFloat(grandAvgFat).toFixed(1)}</Text>
+                <Text style={styles.totalValue}>{grandAvgFat}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Avg SNF:</Text>
-                <Text style={styles.totalValue}>{parseFloat(grandAvgSnf).toFixed(1)}</Text>
+                <Text style={styles.totalValue}>{grandAvgSnf}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Avg CLR:</Text>
-                <Text style={styles.totalValue}>{parseFloat(grandAvgClr).toFixed(1)}</Text>
+                <Text style={styles.totalValue}>{grandAvgClr}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Rate:</Text>
-                <Text style={styles.totalValue}>₹{parseFloat(grandAvgRate).toFixed(2)}</Text>
+                <Text style={styles.totalValue}>₹{grandAvgRate}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Amount:</Text>
-                <Text style={styles.totalValue}>₹{parseFloat(grandTotalAmount).toFixed(2)}</Text>
+                <Text style={styles.totalValue}>₹{grandTotalAmount}</Text>
             </View>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Incentive:</Text>
                 <Text style={[styles.totalValue, { color: "green" }]}>
-                    ₹{parseFloat(grandTotalIncentive).toFixed(2)}
+                    ₹{grandTotalIncentive}
                 </Text>
             </View>
             <View style={[styles.totalRow, styles.grandTotalRow]}>
                 <Text style={styles.grandTotalLabel}>Grand Total:</Text>
                 <Text style={styles.grandTotalValue}>
-                    ₹{parseFloat(grandTotal).toFixed(2)}
+                    ₹{grandTotal}
                 </Text>
             </View>
         </View>
@@ -501,12 +501,12 @@ const CumilativeRecords: React.FC = () => {
             startY += 4;
 
             const tableData = data?.map((item: any) => [
-                item.memberCount,
-                item.MILKTYPE,
-                item.totalQty,
-                item.totalAmount,
-                item.totalIncentive,
-                item.grandTotal,
+                item?.memberCount,
+                item?.MILKTYPE,
+                item?.totalQty,
+                item?.totalAmount,
+                item?.totalIncentive,
+                item?.grandTotal,
             ]);
 
             autoTable(doc, {
@@ -641,7 +641,8 @@ const CumilativeRecords: React.FC = () => {
                         <>
                             <View style={styles.headingCard}>
                                 <Text style={styles.headingTitle}>RECORD SECTION</Text>
-                            </View>                            <FlatList
+                            </View>
+                            <FlatList
                                 data={sortedRecords}
                                 renderItem={renderRecordItem}
                                 keyExtractor={(_, index) => index.toString()}

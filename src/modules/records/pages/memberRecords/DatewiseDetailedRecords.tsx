@@ -56,9 +56,9 @@ const DailyRecordCard: React.FC<{ dailyRecord: any; index: number }> = ({ dailyR
                         </View>
                         <View style={styles.recordColumn}>
                             <Text style={styles.recordText}>Rate: ₹{item?.RATE.toFixed(2)}</Text>
-                            {/* <Text style={styles.recordText}>Amount: ₹{item?.AMOUNT.toFixed(2)}</Text> */}
-                            <Text style={styles.recordText}>Incentive: ₹{item?.INCENTIVEAMOUNT.toFixed(1)}</Text>
-                            <Text style={styles.grandTotalText}>Total: ₹{item?.TOTALAMOUNT.toFixed(2)}</Text>
+                            <Text style={styles.recordText}>Amount: ₹{item?.TOTALAMOUNT.toFixed(2)}</Text>
+                            <Text style={styles.recordText}>Incentive: ₹{item?.INCENTIVEAMOUNT.toFixed(2)}</Text>
+                            <Text style={styles.grandTotalText}>Total: ₹{(item?.TOTALAMOUNT + item?.INCENTIVEAMOUNT).toFixed(2)}</Text>
 
                         </View>
                     </View>
@@ -164,6 +164,7 @@ const DatewiseDetailedRecords: React.FC = () => {
                     limit: 10000,
                 },
             }).unwrap();
+            console.log(result)
             setAllRecords(result?.data || []);
             setTotalCount(result?.data?.length || 0);
             setHasSearched(true);

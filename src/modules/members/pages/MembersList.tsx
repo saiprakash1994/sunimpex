@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     },
 
     listContainer: {
-        paddingVertical: 10,
+        paddingVertical: 50,
     },
     memberCard: {
         backgroundColor: "#fff",
@@ -509,7 +509,8 @@ const styles = StyleSheet.create({
         shadowColor: "#000",
         shadowOpacity: 0.05,
         shadowRadius: 4,
-        elevation: 2
+        elevation: 2,
+
     },
     searchBar: {
         flexDirection: "row",

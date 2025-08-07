@@ -124,7 +124,9 @@ const DashboardScreen = () => {
         totals?.find((item: any) => item?._id?.milkType === "COW")?.totalQuantity || 0;
     const buffaloQuantity =
         totals?.find((item: any) => item?._id?.milkType === "BUF")?.totalQuantity || 0;
-
+    const cow = totals.find((item: any) => item._id?.milkType === "COW") || {};
+    const buf = totals.find((item: any) => item._id?.milkType === "BUF") || {};
+    const total = totals.find((item: any) => item._id?.milkType === "TOTAL") || {};
     // Updated Pie Chart data with a modern color scheme
     const pieData = [
         { name: "Cow Milk 🐄", quantity: cowQuantity, color: THEME_COLORS.primary, legendFontColor: "#1f2937", legendFontSize: 15 },
@@ -267,28 +269,29 @@ const DashboardScreen = () => {
                             <View style={[styles.iconCircle, { backgroundColor: '#ede9fe' }]}>
                                 <Icon name="water-outline" size={24} color="#6366f1" />
                             </View>
-                            <Text style={styles.topSummaryValue}>{totals.reduce((sum: any, item: any) => sum + (item?.totalQuantity || 0), 0).toFixed(2)} L</Text>
+                            <Text style={styles.topSummaryValue}>{total?.totalQuantity?.toFixed(2) || "0.00"} L</Text>
                             <Text style={styles.topSummaryLabel}>Total Quantity</Text>
                         </View>
                         <View style={styles.topSummaryCard}>
                             <View style={[styles.iconCircle, { backgroundColor: '#dcfce7' }]}>
                                 <Icon name="currency-inr" size={24} color="#22c55e" />
                             </View>
-                            <Text style={styles.topSummaryValue}>₹{totals.reduce((sum: any, item: any) => sum + (item?.totalAmount || 0), 0).toFixed(2)}</Text>
+                            <Text style={styles.topSummaryValue}>₹{total?.totalAmount?.toFixed(2) || "0.00"}</Text>
                             <Text style={styles.topSummaryLabel}>Total Amount</Text>
                         </View>
                         <View style={styles.topSummaryCard}>
                             <View style={[styles.iconCircle, { backgroundColor: '#fef9c3' }]}>
                                 <Icon name="gift-outline" size={24} color="#f59e42" />
                             </View>
-                            <Text style={styles.topSummaryValue}>₹{totals.reduce((sum: any, item: any) => sum + (item?.totalIncentive || 0), 0).toFixed(2)}</Text>
+                            <Text style={styles.topSummaryValue}>₹{total.totalIncentive.toFixed(2) || 0}
+                            </Text>
                             <Text style={styles.topSummaryLabel}>Total Incentive</Text>
                         </View>
                         <View style={styles.topSummaryCard}>
                             <View style={[styles.iconCircle, { backgroundColor: '#fee2e2' }]}>
                                 <Icon name="chart-bar" size={24} color="#e11d48" />
                             </View>
-                            <Text style={styles.topSummaryValue}>₹{totals.reduce((sum: any, item: any) => sum + (item?.totalAmount || 0) + (item?.totalIncentive || 0), 0).toFixed(2)}</Text>
+                            <Text style={styles.topSummaryValue}>₹{((total.totalAmount || 0) + (total.totalIncentive || 0)).toFixed(2)}</Text>
                             <Text style={styles.topSummaryLabel}>Grand Total</Text>
                         </View>
                     </View>

@@ -257,7 +257,8 @@ const SettingsScreen: React.FC = () => {
                 <Text style={styles.switchLabel}><Icon name={icon} size={16} /> {label}</Text>
                 {description ? <Text style={styles.switchDesc}>{description}</Text> : null}
             </View>
-            <Switch value={!!value} onValueChange={onValueChange} />
+            <Switch value={!!value} onValueChange={onValueChange} thumbColor={value ? THEME_COLORS.secondary : "#f4f4f5"}          // the toggle knob
+            />
         </View>
     );
 
