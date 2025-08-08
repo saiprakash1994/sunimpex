@@ -164,7 +164,6 @@ const DatewiseDetailedRecords: React.FC = () => {
                     limit: 10000,
                 },
             }).unwrap();
-            console.log(result)
             setAllRecords(result?.data || []);
             setTotalCount(result?.data?.length || 0);
             setHasSearched(true);
@@ -206,6 +205,52 @@ const DatewiseDetailedRecords: React.FC = () => {
         const dateB = new Date(b.SAMPLEDATE).getTime();
         return dateA - dateB;
     });
+    console.log(sortedRecords[0]?.milktypeStats)
+    const renderTotalItem = ({ item }: { item: any }) => (
+        <View style={styles.totalCard}>
+            <Text style={styles.totalTitle}>{item?.milktype} Milk</Text>
+            <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Samples:</Text>
+                <Text style={styles.totalValue}>{item?.totalSamples}</Text>
+            </View>
+            <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Avg Fat:</Text>
+                <Text style={styles.totalValue}>{item?.avgFat}</Text>
+            </View>
+            <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Avg SNF:</Text>
+                <Text style={styles.totalValue}>{item?.avgSnf}</Text>
+            </View>
+            <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Avg CLR:</Text>
+                <Text style={styles.totalValue}>{item?.avgClr}</Text>
+            </View>
+            <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Qty (L):</Text>
+                <Text style={styles.totalValue}>{item?.totalQty}</Text>
+            </View>
+            <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Rate:</Text>
+                <Text style={styles.totalValue}>₹{item?.avgRate}</Text>
+            </View>
+            <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Amount:</Text>
+                <Text style={styles.totalValue}>₹{item?.totalAmount}</Text>
+            </View>
+            <View style={styles.totalRow}>
+                <Text style={[styles.totalValue, { color: "green" }]}>Incentive:</Text>
+                <Text style={[styles.totalValue, { color: "green" }]}>
+                    ₹{item?.totalIncentive}
+                </Text>
+            </View>
+            <View style={[styles.totalRow, styles.grandTotalRow]}>
+                <Text style={styles.grandTotalLabel}>Grand Total:</Text>
+                <Text style={styles.grandTotalValue}>
+                    ₹{(parseFloat(item?.totalAmount) + parseFloat(item?.totalIncentive)).toFixed(2)}
+                </Text>
+            </View>
+        </View>
+    );
 
     const saveAndShareFile = async (filePath: string, mime: string) => {
         try {
@@ -454,20 +499,39 @@ const DatewiseDetailedRecords: React.FC = () => {
                 <ActivityIndicator size="large" color="#2196f3" style={{ marginTop: 20 }} />
             ) : totalCount > 0 ? (
                 <>
-                    <View style={styles.headingCard}>
-                        <Text style={styles.headingTitle}>RECORD SECTION</Text>
-                    </View>
+                    {(
+                        <>
+                            <View style={styles.headingCard}>
+                                <Text style={styles.headingTitle}>TOTAL SECTION</Text>
+                            </View>
+
+                            <FlatList
+                                data={sortedRecords[0]?.milktypeStats}
+                                renderItem={renderTotalItem}
+                                keyExtractor={(_, index) => index.toString()}
+                                contentContainerStyle={{ paddingBottom: 20 }}
+                                scrollEnabled={false}
+                            />
+                        </>
+
+                    )}
 
                     {(
-                        <FlatList
-                            data={sortedRecords}
-                            renderItem={({ item, index }) => (
-                                <DailyRecordCard dailyRecord={item} index={index} />
-                            )}
-                            keyExtractor={(_, index) => index.toString()}
-                            contentContainerStyle={{ paddingBottom: 20 }}
-                            scrollEnabled={false}
-                        />
+                        <>
+                            <View style={styles.headingCard}>
+                                <Text style={styles.headingTitle}>RECORD SECTION</Text>
+                            </View>
+                            <FlatList
+                                data={sortedRecords}
+                                renderItem={({ item, index }) => (
+                                    <DailyRecordCard dailyRecord={item} index={index} />
+                                )}
+                                keyExtractor={(_, index) => index.toString()}
+                                contentContainerStyle={{ paddingBottom: 20 }}
+                                scrollEnabled={false}
+                            />
+                        </>
+
                     )}
 
                 </>

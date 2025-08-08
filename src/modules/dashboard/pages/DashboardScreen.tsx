@@ -21,6 +21,7 @@ import { roles } from "../../../shared/utils/appRoles";
 import { skipToken } from '@reduxjs/toolkit/query';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TEXT_COLORS, THEME_COLORS } from "../../../globalStyle/GlobalStyles";
+import { RefreshControl } from "react-native-gesture-handler";
 type RootStackParamList = {
     login: undefined;
 };
@@ -55,6 +56,7 @@ const DashboardScreen = () => {
     const [selectedShift, setSelectedShift] = useState("");
     const [selectedDeviceId, setSelectedDeviceId] = useState("");
     const [selectedDairyCode, setSelectedDairyCode] = useState(""); // For admin dairy filter
+    const [refreshing, setRefreshing] = useState(false);
 
     // Unique dairy codes for admin
     const dairyCodes = useMemo(() => {
@@ -115,7 +117,7 @@ const DashboardScreen = () => {
         }
     }, [userInfo, isAdmin, navigation]);
 
-    const { data, isLoading, isError, error } = useGetMultipleRecordsQuery(
+    const { data, isLoading, isError, error, refetch } = useGetMultipleRecordsQuery(
         { params: { deviceCodes, date: formattedDate, shift: selectedShift } },
         { skip: skipFetch }
     );
@@ -159,8 +161,15 @@ const DashboardScreen = () => {
         </View>
     );
 
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await refetch();
+        setRefreshing(false);
+    };
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container} refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
             {/* Filters Card */}
             <View style={styles.filtersCardModern}>
                 <Text style={styles.sectionTitle}><Icon name="filter-variant" size={22} color={THEME_COLORS.secondary} /> Filters</Text>
