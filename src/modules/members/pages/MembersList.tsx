@@ -443,6 +443,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginRight: 8,
+        color: THEME_COLORS.secondary
     },
 
     addButton: {
@@ -484,11 +485,13 @@ const styles = StyleSheet.create({
     summaryValue: {
         fontSize: 20,
         fontWeight: "700",
-        marginVertical: 4
+        marginVertical: 4,
+        color: TEXT_COLORS.primary
+
     },
     summaryLabel: {
         fontSize: 12,
-        color: "#555"
+        color: TEXT_COLORS.secondary
     },
     pickerContainer: {
         backgroundColor: "#fff",
@@ -562,11 +565,13 @@ const styles = StyleSheet.create({
     memberName: {
         fontSize: 16,
         fontWeight: "700",
-        marginVertical: 4
+        marginVertical: 4,
+        color: TEXT_COLORS.secondary
+
     },
     memberDetail: {
         fontSize: 14,
-        color: "#555"
+        color: TEXT_COLORS.secondary
     },
     statusText: {
         fontWeight: "700"
