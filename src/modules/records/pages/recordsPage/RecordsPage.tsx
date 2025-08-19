@@ -8,6 +8,7 @@ import AbsentMemberRecords from "../memberRecords/AbsentMemberRecords";
 import CumulativeRecords from "../memberRecords/CumilativeRecords";
 import DatewiseDetailedRecords from "../memberRecords/DatewiseDetailedRecords";
 import DatewiseSummaryRecords from "../memberRecords/DatewiseSummaryRecords";
+import MilkCollection from "../../../transactions/MilkCollection";
 
 const RecordsPage: React.FC = () => {
 
@@ -21,7 +22,9 @@ const RecordsPage: React.FC = () => {
     { key: "absentRecords", title: "Absent List" },
     { key: "cumilativeRecords", title: "Payment Register" },
     { key: "datewiseDetailed", title: "Datewise Detailed" },
-    { key: "datewiseSummary", title: "Datewise Summary" }
+    { key: "datewiseSummary", title: "Datewise Summary" },
+    { key: "milkCollection", title: "Milk Collection" }
+
   ]);
 
   const renderScene = SceneMap({
@@ -30,7 +33,8 @@ const RecordsPage: React.FC = () => {
     absentRecords: AbsentMemberRecords,
     cumilativeRecords: CumulativeRecords,
     datewiseDetailed: DatewiseDetailedRecords,
-    datewiseSummary: DatewiseSummaryRecords
+    datewiseSummary: DatewiseSummaryRecords,
+    milkCollection: MilkCollection
   });
 
   return (

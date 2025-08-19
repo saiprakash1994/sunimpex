@@ -257,7 +257,8 @@ const SettingsScreen: React.FC = () => {
                 <Text style={styles.switchLabel}><Icon name={icon} size={16} /> {label}</Text>
                 {description ? <Text style={styles.switchDesc}>{description}</Text> : null}
             </View>
-            <Switch value={!!value} onValueChange={onValueChange} thumbColor={value ? THEME_COLORS.secondary : "#f4f4f5"}          // the toggle knob
+            <Switch value={!!value} onValueChange={onValueChange} thumbColor={value ? THEME_COLORS.secondary : "#f4f4f5"} trackColor={{ false: TEXT_COLORS.secondary, true: THEME_COLORS.primary }}
+
             />
         </View>
     );
@@ -543,8 +544,8 @@ const SettingsScreen: React.FC = () => {
                             </View>
                             {!isDevice && (
                                 <TouchableOpacity onPress={() => setSelectedDeviceId('')} style={styles.changeDeviceBtn}>
-                                    <Icon name="desktop" size={16} />
-                                    <Text style={{ marginLeft: 4 }}>Change Device</Text>
+                                    <Icon name="desktop" size={16} color={TEXT_COLORS.primary} />
+                                    <Text style={{ marginLeft: 4, color: TEXT_COLORS.primary }}>Change Device</Text>
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -583,6 +584,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginRight: 8,
+        color: TEXT_COLORS.primary
     },
     deviceIdBadge: {
         backgroundColor: THEME_COLORS.secondary,
@@ -610,8 +612,8 @@ const styles = StyleSheet.create({
     tabButtonText: { marginLeft: 6, fontWeight: 'bold', color: TEXT_COLORS.secondary },
     tabContent: { marginTop: 12 },
     switchRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
-    switchLabel: { fontWeight: 'bold', fontSize: 16, flexDirection: 'row', alignItems: 'center' },
-    switchDesc: { color: '#666', fontSize: 12 },
+    switchLabel: { fontWeight: 'bold', fontSize: 16, flexDirection: 'row', alignItems: 'center', color: TEXT_COLORS.primary },
+    switchDesc: { color: TEXT_COLORS.secondary, fontSize: 12 },
     sectionTitle: { fontWeight: 'bold', fontSize: 16, marginVertical: 8 },
     analyzerButton: { backgroundColor: TEXT_COLORS.secondary, borderRadius: 8, padding: 8, marginRight: 8 },
     analyzerButtonSelected: { backgroundColor: THEME_COLORS.secondary },

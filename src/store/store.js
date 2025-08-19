@@ -18,6 +18,7 @@ import { DairyApi } from '../modules/dairy/store/dairyApi';
 import { DeviceApi } from '../modules/device/store/deviceApi';
 import { RecordApi } from '../modules/records/store/recordApi';
 import { UploadApi } from '../modules/uploads/store/uploadApi';
+import { TransactionApi } from '../modules/transactions/recordApiSlice';
 
 const persistConfig = {
     key: 'root',
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
     [DeviceApi.reducerPath]: DeviceApi.reducer,
     [RecordApi.reducerPath]: RecordApi.reducer,
     [UploadApi.reducerPath]: UploadApi.reducer,
+    [TransactionApi.reducerPath]: TransactionApi.reducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -44,7 +46,7 @@ const store = configureStore({
             serializableCheck: {
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
             },
-        }).concat(authApi.middleware, DairyApi.middleware, DeviceApi.middleware, RecordApi.middleware, UploadApi.middleware),
+        }).concat(authApi.middleware, DairyApi.middleware, DeviceApi.middleware, RecordApi.middleware, UploadApi.middleware, TransactionApi.middleware),
 });
 
 store.subscribe(() => {

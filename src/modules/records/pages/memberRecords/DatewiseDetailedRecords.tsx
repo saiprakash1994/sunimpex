@@ -205,7 +205,6 @@ const DatewiseDetailedRecords: React.FC = () => {
         const dateB = new Date(b.SAMPLEDATE).getTime();
         return dateA - dateB;
     });
-    console.log(sortedRecords[0]?.milktypeStats)
     const renderTotalItem = ({ item }: { item: any }) => (
         <View style={styles.totalCard}>
             <Text style={styles.totalTitle}>{item?.milktype} Milk</Text>
