@@ -558,7 +558,6 @@ export default function MilkCollection() {
         </View>
     );
 
-    console.log(record, 'sai')
     return (
         // --- inside return ---
         <ScrollView style={styles.container}>
@@ -725,7 +724,14 @@ export default function MilkCollection() {
 
             {/* Buttons */}
             <View style={styles.row}>
-                <TouchableOpacity style={styles.buttonPrimary} onPress={handleSubmit}>
+                <TouchableOpacity
+                    style={[
+                        styles.buttonPrimary,
+                        (!record.code || record.amount <= 0) && styles.buttonDisabled,
+                    ]}
+                    onPress={handleSubmit}
+                    disabled={!record.code || record.amount <= 0}
+                >
                     <Text style={styles.buttonText}>
                         {isEditRecord ? "Update Record" : "Add Record"}
                     </Text>
@@ -817,7 +823,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     buttonText: { color: "#fff", fontWeight: "bold" },
-
+    buttonDisabled: {
+        backgroundColor: TEXT_COLORS.secondary,
+    },
     recordRow: {
         flexDirection: "row",
         justifyContent: "space-between",
