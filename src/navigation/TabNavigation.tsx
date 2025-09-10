@@ -85,7 +85,7 @@ export const TabNavigation = () => {
                 options={{
                     title: "Milk Collection",
                     headerShown: true,
-                    tabBarLabel: "ADD",
+                    tabBarLabel: "",
                 }}
             />
             <Tab.Screen
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     plusButton: {
-        top: -15,
+        top: 5,
         justifyContent: 'center',
         alignItems: 'center',
         width: 60,
