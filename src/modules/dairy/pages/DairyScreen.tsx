@@ -19,6 +19,7 @@ import { ShowToster } from "../../../shared/components/ShowToster";
 import { DairyIcon, DeviceIcon } from "../../../icons/SvgIcons";
 import { TEXT_COLORS, THEME_COLORS } from "../../../globalStyle/GlobalStyles";
 import { ScrollView } from "react-native-gesture-handler";
+import WhatsAppExample from "../../../screens/WhatsAppExample";
 type RootStackParamList = {
     dairyadd: { dairyCode?: string } | undefined;
 };
@@ -174,6 +175,7 @@ const DairyPage = () => {
                     />
                 )}
             </View>
+            <WhatsAppExample />
         </ScrollView>
     );
 };

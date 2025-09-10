@@ -8,7 +8,6 @@ import AbsentMemberRecords from "../memberRecords/AbsentMemberRecords";
 import CumulativeRecords from "../memberRecords/CumilativeRecords";
 import DatewiseDetailedRecords from "../memberRecords/DatewiseDetailedRecords";
 import DatewiseSummaryRecords from "../memberRecords/DatewiseSummaryRecords";
-import MilkCollection from "../../../transactions/MilkCollection";
 
 const RecordsPage: React.FC = () => {
 
@@ -23,7 +22,6 @@ const RecordsPage: React.FC = () => {
     { key: "cumilativeRecords", title: "Payment Register" },
     { key: "datewiseDetailed", title: "Datewise Detailed" },
     { key: "datewiseSummary", title: "Datewise Summary" },
-    { key: "milkCollection", title: "Milk Collection" }
 
   ]);
 
@@ -34,7 +32,6 @@ const RecordsPage: React.FC = () => {
     cumilativeRecords: CumulativeRecords,
     datewiseDetailed: DatewiseDetailedRecords,
     datewiseSummary: DatewiseSummaryRecords,
-    milkCollection: MilkCollection
   });
 
   return (
