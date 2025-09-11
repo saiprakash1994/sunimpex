@@ -289,7 +289,7 @@ const SettingsScreen: React.FC = () => {
                 return (
                     <View>
                         <Text style={styles.sectionTitle}><Icon name="chart-line" size={16} /> Milk Analyzer</Text>
-                        <ScrollView horizontal style={{ marginVertical: 8 }}>
+                        <View style={styles.analyzerCard}>
                             {analyzerOptions.map((analyzer) => (
                                 <TouchableOpacity
                                     key={analyzer.value}
@@ -302,7 +302,7 @@ const SettingsScreen: React.FC = () => {
                                     <Text style={styles.analyzerButtonText}>{analyzer.label}</Text>
                                 </TouchableOpacity>
                             ))}
-                        </ScrollView>
+                        </View>
                         <View style={styles.switchCard}>
                             <View style={{ flex: 1, }}>
                                 <SwitchControl
@@ -464,6 +464,8 @@ const SettingsScreen: React.FC = () => {
                                 onBlur={() => handleChange('normalCommission', formatCommission(settings.normalCommission || ''))}
                                 editable={!!settings.commissionType}
                                 keyboardType="decimal-pad"
+                                placeholderTextColor={TEXT_COLORS.secondary}
+
                             />
                         </View>
                         <Text style={styles.inputLabel}><Icon name="calculator" size={16} /> Special Commissions</Text>
@@ -478,6 +480,7 @@ const SettingsScreen: React.FC = () => {
                                     onBlur={() => handleSpecialCommissionChange(i, formatCommission(val))}
                                     editable={!!settings.commissionType}
                                     keyboardType="decimal-pad"
+                                    placeholderTextColor={TEXT_COLORS.secondary}
                                 />
                             ))}
                         </View>
@@ -615,10 +618,7 @@ const styles = StyleSheet.create({
     switchLabel: { fontWeight: 'bold', fontSize: 16, flexDirection: 'row', alignItems: 'center', color: TEXT_COLORS.primary },
     switchDesc: { color: TEXT_COLORS.secondary, fontSize: 12 },
     sectionTitle: { fontWeight: 'bold', fontSize: 16, marginVertical: 8 },
-    analyzerButton: { backgroundColor: TEXT_COLORS.secondary, borderRadius: 8, padding: 8, marginRight: 8 },
-    analyzerButtonSelected: { backgroundColor: THEME_COLORS.secondary },
-    analyzerButtonText: { color: TEXT_COLORS.whiteColor, fontWeight: 'bold' },
-    inputLabel: { fontWeight: 'bold', marginTop: 8 },
+    inputLabel: { fontWeight: 'bold', marginTop: 8, },
     input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 8, marginVertical: 4, backgroundColor: '#fff' },
     inputDisabled: { backgroundColor: '#e9ecef', color: '#aaa' },
     specialCommissionRow: { flexDirection: 'row', flexWrap: 'wrap', marginVertical: 8 },
@@ -645,6 +645,35 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
+    },
+    analyzerCard: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',   // allow wrapping
+        justifyContent: 'space-between',
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 16,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    analyzerButton: {
+        width: '30%',        // 3 buttons per row
+        backgroundColor: TEXT_COLORS.secondary,
+        borderRadius: 8,
+        paddingVertical: 12,
+        marginVertical: 6,
+        alignItems: 'center',
+    },
+    analyzerButtonSelected: {
+        backgroundColor: THEME_COLORS.secondary,
+    },
+    analyzerButtonText: {
+        color: TEXT_COLORS.whiteColor,
+        fontWeight: 'bold',
     },
 
 });

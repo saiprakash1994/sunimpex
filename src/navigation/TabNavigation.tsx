@@ -68,7 +68,7 @@ export const TabNavigation = () => {
                 component={DashboardScreen}
                 options={{
                     title: "Home",
-                    headerShown: true,
+                    headerShown: false,
                 }}
             />
             <Tab.Screen
@@ -85,7 +85,7 @@ export const TabNavigation = () => {
                 options={{
                     title: "Milk Collection",
                     headerShown: true,
-                    tabBarLabel: "",
+                    tabBarLabel: "Collection",
                 }}
             />
             <Tab.Screen
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     plusButton: {
-        top: 5,
+        top: -15,
         justifyContent: 'center',
         alignItems: 'center',
         width: 60,

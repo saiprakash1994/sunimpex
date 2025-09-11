@@ -10,7 +10,6 @@ import {
     GroupPeople,
     LogoutIcon,
     UploadIcon,
-    RateChart,
     HomeIcon,
     SettingsIcon,
     ReportsIcon
@@ -170,7 +169,6 @@ const MenuScreen = () => {
             case 'device': return <DeviceIcon {...iconProps} />;
             case 'upload': return <UploadIcon {...iconProps} />;
             case 'profile': return <AccountIcon {...iconProps} />;
-            case 'rateTable': return <RateChart {...iconProps} />;
             case 'settings': return <SettingsIcon {...iconProps} />;
             case 'reports': return <ReportsIcon {...iconProps} />;
             case 'logout': return <LogoutIcon {...iconProps} />;

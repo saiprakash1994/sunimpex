@@ -23,7 +23,7 @@ import { TransactionApi } from '../modules/transactions/recordApiSlice';
 const persistConfig = {
     key: 'root',
     storage: AsyncStorage,
-    whitelist: ['userInfoSlice'], // We only want to persist the userInfoSlice
+    whitelist: ['userInfoSlice'],
 };
 
 const rootReducer = combineReducers({
